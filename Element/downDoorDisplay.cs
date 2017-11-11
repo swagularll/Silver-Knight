@@ -2,6 +2,7 @@
 using System.Collections;
 using HutongGames.PlayMaker;
 using UnityEngine.UI;
+using Assets.Script.ODM_Widget;
 
 public class downDoorDisplay : MonoBehaviour
 {
@@ -16,18 +17,18 @@ public class downDoorDisplay : MonoBehaviour
 
     void Start()
     {
-        eventCenter = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<eventCenter>();
+        eventCenter = ODMObject.event_manager.GetComponent<eventCenter>();
     }
 
     public void checkVisibility()
     {
         if (mainMap.downDoor != null)
         {
-            if (eventCenter.getFlagBool("Area" + mainMap.name))
+            if (eventCenter.getFlagBool("Area " + mainMap.name))
                 GetComponent<CanvasGroup>().alpha = 1f;
             else if (downMap != null)
             {
-                if (eventCenter.getFlagBool("Area" + downMap.name))
+                if (eventCenter.getFlagBool("Area " + downMap.name))
                     GetComponent<CanvasGroup>().alpha = 1f;
                 else
                     GetComponent<CanvasGroup>().alpha = 0f;

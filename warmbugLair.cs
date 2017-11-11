@@ -7,6 +7,7 @@ using System.Text;
 using LitJson;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Script.ODM_Widget;
 
 public class warmbugLair : MonoBehaviour
 {
@@ -16,19 +17,22 @@ public class warmbugLair : MonoBehaviour
 
     public List<GameObject> lair_entity_collection;
     public List<GameObject> living_bug_entity_colleciton;
-    private List<ODM.lairInfo> level_lair_info_collection;// for save record
+
+
+    private List<lairInfo> level_lair_info_collection;// for save record
 
     private eventCenter event_center;
+    private warmbugLairManager warmbug_lair_manager;
+
     private string level_name;
     public string reset_flag;
     public string lair_approval_flag;
-    private warmbugLairManager lair_manager;
 
     void Awake()
     {
-        event_center = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<eventCenter>();
-        lair_manager = event_center.GetComponent<warmbugLairManager>();
-        level_lair_info_collection = lair_manager.getLairInfo(level_name);
+        warmbug_lair_manager = ODMObject.event_manager.GetComponent<warmbugLairManager>();
+        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
+        level_lair_info_collection = new List<lairInfo>();
 
         level_name = Application.loadedLevelName;
         reset_flag = level_name + " Warmbug Reset";
@@ -38,162 +42,99 @@ public class warmbugLair : MonoBehaviour
         resetRequest = event_center.getFlagBool(reset_flag);
     }
 
-    void Start()
+
+    private void generateLairInfo()
+    {
+        //For empty lairs
+        for (int i = 0; i < lair_entity_collection.Count; i++)
+        {
+            //Get Warmbug from catalogue
+            int bug_rand_index = (int)UnityEngine.Random.Range(0, 100.0f) % warmbug_lair_manager.getBugCatelogCount();
+            GameObject lair_born_bug = warmbug_lair_manager.getCatelogBugEntity(bug_rand_index);
+
+            createToLairCollection(lair_born_bug);
+        }
+
+        //For living bugs
+        for (int i = 0; i < living_bug_entity_colleciton.Count; i++)
+        {
+            createToLairCollection(living_bug_entity_colleciton[i]);
+        }
+    }
+
+    public void createToLairCollection(GameObject _lair_born_bug)
+    {
+        lairInfo lair_info = new lairInfo();
+        _lair_born_bug.GetComponent<warmbugAction>().initilization(this, lair_info, false);
+        lair_info.bug_name = _lair_born_bug.GetComponent<warmbugAction>().getName();
+        lair_info.location_x = _lair_born_bug.transform.position.x;
+        //collection x value
+        //bug.transform.position = bug_position;//record WB location for reput
+        level_lair_info_collection.Add(lair_info);
+    }
+
+    public void releaseWarmbugs()
     {
         if (isActivate || isApproved)
         {
-            if (level_lair_info_collection.Count == 0)
+            if (resetRequest)
             {
-                generateWarmbug();
+                generateLairInfo();
+                deployBugs();
+                event_center.setFlagFalse(reset_flag);
             }
             else
             {
-                if (resetRequest)
-                {
-                    generateWarmbug();
-                    event_center.setFlagFalse(reset_flag);
-                }
-                else
-                {
-                    deployExistWarmbug();
-                }
+                deployBugs();
             }
         }
     }
 
-    private void generateWarmbug()
+    #region WARMBUG SCENE CONTROL
+
+    private void deployBugs()
     {
-        level_lair_info_collection.Clear();
-        addNewBugs();
-        setLivingBugs();
-        recordLairLog();
-        //XXX: requires to modify WB action (SOLO sort)
-
-
-        // lairInfoCollection.Clear();
-        // float sp = FsmVariables.GlobalVariables.GetFsmFloat("ava_current_sp").Value;
-        //if (sp == 100)
-        //{
-        //    addNewBug(5);
-        //}
-        // if (sp > 80)
-        // {
-        //     addNewBug(4);
-        // }
-        // else if (sp > 50)
-        // {
-        //     addNewBug(3);
-        // }
-        // else if (sp > 20)
-        // {
-        //     addNewBug(2);
-        // }
-        // else
-        // {
-        //     addNewBug(1);
-        // }
-    }
-
-    #region Add Warmbugs to scene
-    private void addNewBugs()
-    {
-        for (int i = 0; i < lair_entity_collection.Count; i++)
-        {
-            //Get Warmbug
-            int bug_rand_index = (int)UnityEngine.Random.Range(0, 100.0f) % lair_manager.getBugCount();
-            GameObject lair_born_bug = lair_manager.getBugEntity(bug_rand_index);
-
-            //Deploy Warmbug
-            Vector3 bug_position = new Vector3(lair_entity_collection[i].transform.position.x,
-            lair_born_bug.transform.position.y,
-            lair_born_bug.transform.position.z);
-            Instantiate(lair_born_bug, bug_position, Quaternion.identity);
-
-            //Generate lairInfo
-            ODM.lairInfo lair_info = new ODM.lairInfo();
-            lair_born_bug.GetComponent<warmbugAction>().initilization(this, lair_info, false);
-            lair_info.bug_name = lair_born_bug.GetComponent<warmbugAction>().getName();
-            lair_info.location_x = lair_born_bug.transform.position.x;//collection x value
-            // bug.transform.position = bug_position;//record WB location for reput
-            level_lair_info_collection.Add(lair_info);
-        }
-    }
-
-    private void setLivingBugs()
-    {
-        for (int i = 0; i < living_bug_entity_colleciton.Count; i++)
-        {
-            //Get Warmbug
-            GameObject living_bug = living_bug_entity_colleciton[i];
-            //Initilize Warmbug (No need to deploy)
-
-            //Generate lairInfo
-            ODM.lairInfo lair_info = new ODM.lairInfo();
-            living_bug.GetComponent<warmbugAction>().initilization(this, lair_info, true);//send start command to action
-            lair_info.bug_name = living_bug.GetComponent<warmbugAction>().getName();
-            lair_info.location_x = living_bug.transform.position.x;//Set WB position according to scene view
-            level_lair_info_collection.Add(lair_info);
-        }
-    }
-
-    private void putBug(ODM.lairInfo _lair_info)
-    {
-        //do concern that index might be larger than collection count. 
-        //GameObject bug = Instantiate(warmbugTypeCollection[_info.warmbugIndex]);
-        GameObject rebirth_bug = lair_manager.getBugEntity(_lair_info.bug_name);
-        Vector3 bug_position = new Vector3((float)_lair_info.location_x,
-            rebirth_bug.transform.position.y,
-            rebirth_bug.transform.position.z);
-
-        //Deploy Warmbug
-        GameObject bug = (GameObject)Instantiate(rebirth_bug, bug_position, Quaternion.identity);
-        bug.GetComponent<warmbugAction>().initilization(this, _lair_info, false);
-    }
-    #endregion
-
-    #region data manipulation methods
-    private void recordLairLog()
-    {
-        lair_manager.setLairInfo(level_name, level_lair_info_collection);
-        // StreamWriter sw = new StreamWriter(lairLevelFile, false, Encoding.Default);
-        // sw.Write(JsonMapper.ToJson(lairInfoCollection));
-        // sw.Close();
-    }
-
-    // private void addToLair(GameObject _item, List<GameObject> _itemCollection)
-    // {
-    //     if (_item != null)
-    //     {
-    //         _itemCollection.Add(_item);
-    //     }
-    // }
-    private void deployExistWarmbug()
-    {
-        // StreamReader sr = new StreamReader(lairLevelFile, Encoding.Default);
-        // lairInfoCollection = JsonMapper.ToObject<List<lairInfo>>(sr.ReadToEnd());
-        // sr.Close();
-        // lair_info_collection = event_center.lair_info_collection.getValue(level_name);
-
         for (int i = 0; i < level_lair_info_collection.Count; i++)
         {
             putBug(level_lair_info_collection[i]);
         }
-        //HP will randomly generated by FSM Health System
     }
+    private void putBug(lairInfo _lair_info)
+    {
+        GameObject catelog_bug = Instantiate(warmbug_lair_manager.getCatelogBugEntity(_lair_info.bug_name));
+        Vector3 bug_position = new Vector3((float)_lair_info.location_x,
+            catelog_bug.transform.position.y,
+            catelog_bug.transform.position.z);
 
+        //Deploy Warmbug
+        GameObject bug = (GameObject)Instantiate(catelog_bug, bug_position, Quaternion.identity);
+        bug.GetComponent<warmbugAction>().initilization(this, _lair_info, false);
+    }
     public void setDead(string _warmbugID)
     {
         var result = level_lair_info_collection.Where(x => x.warmbug_guid.Equals(_warmbugID));
         level_lair_info_collection.RemoveAll(x => x.warmbug_guid.Equals(_warmbugID));
-        recordLairLog();
-        //string debugFile = warmbugDeploymentFilePath + "/" + "Lair Log.txt";
-        //StreamWriter sw = new StreamWriter(debugFile, true, Encoding.Default);
-        //sw.WriteLine("Current Warmbug = " + _warmbugID);
-        //sw.WriteLine("Search Result = " + result);
-        //sw.WriteLine(JsonMapper.ToJson(lairInfoCollection));
-        //sw.WriteLine("-----------------------------------");
-        //sw.Close();
+        updateBugDistribution();
     }
     #endregion
+
+
+    #region DISTRIBUTION MANIPULATION
+    public void registerLevelLair()
+    {
+        generateLairInfo();
+        warmbug_lair_manager.registerLair(level_name, JsonMapper.ToJson(living_bug_entity_colleciton).ToString());
+    }
+    public void loadLevelLair()
+    {
+        level_lair_info_collection = warmbug_lair_manager.getLevelDistribution(level_name);
+    }
+    private void updateBugDistribution()
+    {
+        warmbug_lair_manager.setLairInfo(level_name, level_lair_info_collection);
+    }
+    #endregion
+
+
 
 }

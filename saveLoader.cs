@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using LitJson;
+using Assets.Script.ODM_Widget;
 
 public class saveLoader : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class saveLoader : MonoBehaviour
             if (!FsmVariables.GlobalVariables.GetFsmBool("create_new_save").Value)
             {
                 //Load game from save record
-                ODM.saveRecord save_record = ODM.getCurrentRecord();
+                saveRecord save_record = saveRecord.getCurrentRecord();
 
                 PlayerPrefs.SetString("level_to_load", save_record.save_data.getValue("saved_scene"));
                 PlayerPrefs.SetString("game_difficulty", save_record.save_data.getValue("game_difficulty"));
@@ -36,7 +37,7 @@ public class saveLoader : MonoBehaviour
                 FsmVariables.GlobalVariables.GetFsmFloat("ava_current_poison").Value = float.Parse(save_record.save_data.getValue("ava_current_poison"));
 
                 float ava_current_position = float.Parse(save_record.save_data.getValue("ava_current_position"));
-                GameObject Ava = FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value;
+                GameObject Ava = ODMObject.character_ava;
                 if (!development_load)
                 {
                     Vector3 ava_location = new Vector3(ava_current_position, Ava.transform.position.y, Ava.transform.position.z);
@@ -47,18 +48,18 @@ public class saveLoader : MonoBehaviour
             }
 
             //set this to true when the armor recovered
-            fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value, "Player Control Disabled").
+            fsmHelper.getFsm(ODMObject.character_ava, "Player Control Disabled").
                 FsmVariables.GetFsmBool("is_hurt_start").Value = false;
 
             if (FsmVariables.GlobalVariables.GetFsmBool("status_armor").Value)
             {
-                fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value, "Player Control").enabled = true;
-                fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value, "Player Control Disabled").enabled = false;
+                fsmHelper.getFsm(ODMObject.character_ava, "Player Control").enabled = true;
+                fsmHelper.getFsm(ODMObject.character_ava, "Player Control Disabled").enabled = false;
             }
             else
             {
-                fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value, "Player Control").enabled = false;
-                fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value, "Player Control Disabled").enabled = true;
+                fsmHelper.getFsm(ODMObject.character_ava, "Player Control").enabled = false;
+                fsmHelper.getFsm(ODMObject.character_ava, "Player Control Disabled").enabled = true;
             }
             if (!development_load)
                 Application.LoadLevel(PlayerPrefs.GetString("level_to_load"));

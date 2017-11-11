@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
 
 public class eventCenter : MonoBehaviour
 {
@@ -13,11 +14,16 @@ public class eventCenter : MonoBehaviour
     public ODM.ODMDictionary flag_collection;
 
     private PlayMakerFSM fsm;
-    private fsmHelper fsmHelper = new fsmHelper();
+    private fsmHelper fsmHelper;
+
+    void Awake()
+    {
+        fsmHelper = new fsmHelper();
+    }
 
     void Start()
     {
-        flag_collection = ODM.getCurrentRecord().flag_collection;
+        flag_collection = saveRecord.getCurrentRecord().flag_collection;
     }
     #region Flag functions
     public void checkFlag(string _flagString)
@@ -57,7 +63,6 @@ public class eventCenter : MonoBehaviour
             ODM.errorLog(transform.name,
                 "getFlagBool Error. flagName: " + _flagName,
                 ex.ToString());
-
         }
         return result;
     }
@@ -68,7 +73,7 @@ public class eventCenter : MonoBehaviour
             string[] flagSet = _flagSet.Split(new Char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < flagSet.Length; i++)
             {
-                flag_collection.setValue(flagSet[i].Trim(),true.ToString());
+                flag_collection.setValue(flagSet[i].Trim(), true.ToString());
             }
         }
 
@@ -94,6 +99,20 @@ public class eventCenter : MonoBehaviour
         {
             ODM.errorLog(transform.name,
                 "setFlagTrue Error. flagName: " + _flagSet,
+                ex.ToString());
+        }
+    }
+
+    public void setFlagValue(string _flag_name, bool _flag_value)
+    {
+        try
+        {
+            flag_collection.setValue(_flag_name.Trim(), _flag_value.ToString());
+        }
+        catch (Exception ex)
+        {
+            ODM.errorLog(transform.name,
+                "setFlagTrue Error. flagName: " + _flag_name,
                 ex.ToString());
         }
     }

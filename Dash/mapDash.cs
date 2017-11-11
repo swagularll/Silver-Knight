@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using LitJson;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
 
 public class mapDash : MonoBehaviour
 {
@@ -57,13 +58,12 @@ public class mapDash : MonoBehaviour
 
     void Start()
     {
-        ODM odm = new ODM();
-        mapNames = ODM.getMapName();
+        mapNames = dataWidget.getMapName();
         initializeMap();
-        txt_currentLocation = odm.getTranslaton("Map Info currentLocation");//  GameObject.Find("Map Info currentLocation").GetComponent<Text>().text;
-        txt_explored = odm.getTranslaton("Map Info explored");//GameObject.Find("Map Info explored rate").GetComponent<Text>().text;
-        txt_unexplored = odm.getTranslaton("Map Info unexplored");//GameObject.Find("Map Info unexplored rate").GetComponent<Text>().text;
-        txt_exploredRate = odm.getTranslaton("Map Info explored rate");//GameObject.Find("Map Info exploredRate").GetComponent<Text>().text;
+        txt_currentLocation = dataWidget.getTranslaton("Map Info currentLocation");//  GameObject.Find("Map Info currentLocation").GetComponent<Text>().text;
+        txt_explored = dataWidget.getTranslaton("Map Info explored");//GameObject.Find("Map Info explored rate").GetComponent<Text>().text;
+        txt_unexplored = dataWidget.getTranslaton("Map Info unexplored");//GameObject.Find("Map Info unexplored rate").GetComponent<Text>().text;
+        txt_exploredRate = dataWidget.getTranslaton("Map Info explored rate");//GameObject.Find("Map Info exploredRate").GetComponent<Text>().text;
     }
 
     void Update()
@@ -158,7 +158,7 @@ public class mapDash : MonoBehaviour
         exploredMapNumber = 0;
         for (int i = 0; i < mapNames.Length; i++)
         {
-            if (evnetCenter.getFlagBool("Area" + mapNames[i]))
+            if (evnetCenter.getFlagBool("Area " + mapNames[i]))
                 exploredMapNumber++;
         }
 
@@ -274,7 +274,7 @@ public class mapDash : MonoBehaviour
             for (int k = 0; k < mapSquareCollection[i].Count; k++)
             {
                 var square = mapSquareCollection[i][k].GetComponent<mapSquare>();
-                square.state = evnetCenter.getFlagBool("Area" + square.selfRef.name);
+                square.state = evnetCenter.getFlagBool("Area " + square.selfRef.name);
 
                 square.setColor();
 

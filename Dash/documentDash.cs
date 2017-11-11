@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using System;
 using System.Linq;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
 
 public class documentDash : MonoBehaviour
 {
@@ -244,7 +245,7 @@ public class documentDash : MonoBehaviour
 
                 string flagName = txtContent[i].Substring(1, txtContent[i].IndexOf("]") - 1);//flagName: [NAME] => NAME
                 d.Key = flagName.Replace("\r", "").Replace("\n", "");//FileName: [Document02] => Document02
-                d.Unlocked = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<eventCenter>().getFlagBool(flagName);
+                d.Unlocked = ODMObject.event_manager.GetComponent<eventCenter>().getFlagBool(flagName);
                 d.Name = txtContent[i].Replace("[" + flagName + "]", "");//FileName: [Document02] => Document02
                 i++;
                 for (int k = i; k < txtContent.Length; k++)
@@ -365,7 +366,7 @@ public class documentDash : MonoBehaviour
     {
         for (int i = 0; i < documentCollection.Count; i++)
         {
-            documentCollection[i].Unlocked = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<eventCenter>().getFlagBool(documentCollection[i].Key);
+            documentCollection[i].Unlocked = ODMObject.event_manager.GetComponent<eventCenter>().getFlagBool(documentCollection[i].Key);
         }
     }
     private void updateListPageText()

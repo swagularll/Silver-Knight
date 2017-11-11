@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
 
 public class collisionControl : MonoBehaviour {
 
@@ -18,21 +19,21 @@ public class collisionControl : MonoBehaviour {
 
     public void squatSpace()
     {
-        BoxCollider2D area = FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value.GetComponent<BoxCollider2D>();
+        BoxCollider2D area = ODMObject.character_ava.GetComponent<BoxCollider2D>();
         area.size = new Vector2(area.size.x, squatSizeY);
         area.offset = new Vector2(area.offset.x, squatOffsetY);
     }
 
     public void standSpace()
     {
-        BoxCollider2D area = FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value.GetComponent<BoxCollider2D>();
+        BoxCollider2D area = ODMObject.character_ava.GetComponent<BoxCollider2D>();
         area.size = new Vector2(area.size.x, standSizeY);
         area.offset = new Vector2(area.offset.x, standOffsetY);
     }
 
     public void crawlSpace()
     {
-        BoxCollider2D area = FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value.GetComponent<BoxCollider2D>();
+        BoxCollider2D area = ODMObject.character_ava.GetComponent<BoxCollider2D>();
         area.size = new Vector2(area.size.x, crawlSizeY);
         area.offset = new Vector2(area.offset.x, crawlOffsetY);
     }

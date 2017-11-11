@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine.UI;
 using System;
+using Assets.Script.ODM_Widget;
 
 public class saveList : MonoBehaviour
 {
@@ -49,7 +50,7 @@ public class saveList : MonoBehaviour
         foreach (string save_record_file in save_collection)
         {
             StreamReader sr = new StreamReader(save_record_file, Encoding.Default);
-            ODM.saveRecord save_record = new ODM.saveRecord(sr.ReadToEnd());
+            saveRecord save_record = new saveRecord(sr.ReadToEnd());
             listSave.Add(save_record.save_data);
             sr.Close();
         }
@@ -108,7 +109,7 @@ public class saveList : MonoBehaviour
 
     private void showNoRecord()
     {
-         fsmHelper.getFsm(SaveLoadContainer, "FSM").SendEvent("no data");
+        fsmHelper.getFsm(SaveLoadContainer, "FSM").SendEvent("no data");
     }
 
     public void nextPage()
@@ -239,19 +240,19 @@ public class saveList : MonoBehaviour
         if (maxPage != 0)
         {
             if (currentPage == 0)
-                 fsmHelper.getFsm(leftArror, "FSM").SendEvent("set unselectable");
+                fsmHelper.getFsm(leftArror, "FSM").SendEvent("set unselectable");
             else
-                 fsmHelper.getFsm(leftArror, "FSM").SendEvent("set selectable");
+                fsmHelper.getFsm(leftArror, "FSM").SendEvent("set selectable");
 
             if (currentPage == maxPage)
-                 fsmHelper.getFsm(rightArror, "FSM").SendEvent("set unselectable");
+                fsmHelper.getFsm(rightArror, "FSM").SendEvent("set unselectable");
             else
-                 fsmHelper.getFsm(rightArror, "FSM").SendEvent("set selectable");
+                fsmHelper.getFsm(rightArror, "FSM").SendEvent("set selectable");
         }
         else
         {
-             fsmHelper.getFsm(leftArror, "FSM").SendEvent("set unselectable");
-             fsmHelper.getFsm(rightArror, "FSM").SendEvent("set unselectable");
+            fsmHelper.getFsm(leftArror, "FSM").SendEvent("set unselectable");
+            fsmHelper.getFsm(rightArror, "FSM").SendEvent("set unselectable");
         }
     }
 }

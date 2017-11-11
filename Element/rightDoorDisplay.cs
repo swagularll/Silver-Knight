@@ -2,6 +2,7 @@
 using System.Collections;
 using HutongGames.PlayMaker;
 using UnityEngine.UI;
+using Assets.Script.ODM_Widget;
 
 public class rightDoorDisplay : MonoBehaviour
 {
@@ -16,18 +17,18 @@ public class rightDoorDisplay : MonoBehaviour
 
     void Start()
     {
-        eventCenter = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<eventCenter>();
+        eventCenter = ODMObject.event_manager.GetComponent<eventCenter>();
     }
 
     public void checkVisibility()
     {
         if (mainMap.rightDoor != null)
         {
-            if (eventCenter.getFlagBool("Area" + mainMap.name))
+            if (eventCenter.getFlagBool("Area " + mainMap.name))
                 GetComponent<CanvasGroup>().alpha = 1f;
             else if (rightMap != null)
             {
-                if (eventCenter.getFlagBool("Area" + rightMap.name))
+                if (eventCenter.getFlagBool("Area " + rightMap.name))
                     GetComponent<CanvasGroup>().alpha = 1f;
                 else
                     GetComponent<CanvasGroup>().alpha = 0f;

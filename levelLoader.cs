@@ -1,40 +1,50 @@
 ﻿using UnityEngine;
 using System.Collections;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
+using System.Collections.Generic;
 
 public class levelLoader : MonoBehaviour
 {
-    public AudioClip doorSound;
-    private eventCenter eventCenter;
+    public AudioClip sound_door_open;
+    public List<GameObject> local_item_collection;
+    private eventCenter event_center;
     private AudioSource aud;
+
+    private void Awake()
+    {
+        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
+        aud = GetComponent<AudioSource>();
+    }
     void Start()
     {
-        aud = GetComponent<AudioSource>();
-        aud.clip = doorSound;
-        eventCenter = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<eventCenter>();
-        PlayMakerFSM fsmBGM =  fsmHelper.getFsm("BGM Manager", "FSM");
+        //Open door sound
+        aud.clip = sound_door_open;
+
+        //BGM setting
+        PlayMakerFSM fsmBGM = fsmHelper.getFsm("BGM Manager", "FSM");
         if (!fsmBGM.FsmVariables.GetFsmBool("isDefault").Value)
             fsmBGM.SendEvent("set default bgm");
 
-        if (fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value, "Scene Controller").
-            FsmVariables.GetFsmBool("isFirstLoad").Value)//Things need to do when player first time enter the game...
+        //Things need to do when player first time enter the game.
+        if (fsmHelper.getFsm(ODMObject.event_manager, ODMVariable.fsm_scene_controller).
+            FsmVariables.GetFsmBool("isFirstLoad").Value)
         {
-            fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value, "Scene Controller").FsmVariables.GetFsmBool("isFirstLoad").Value = false;
-            Debug.Log("First Load Detected");
+            fsmHelper.getFsm(ODMObject.event_manager, ODMVariable.fsm_scene_controller).FsmVariables.GetFsmBool("isFirstLoad").Value = false;
         }
         else
         {
             setPlayerPosition();
-            eventCenter.GetComponent<actionControl>().setIdle();
+            event_center.GetComponent<actionControl>().setIdle();
         }
     }
 
     public void setPlayerPosition()
     {
-        string intoLocation = FsmVariables.GlobalVariables.GetFsmString("fromDoor").Value;
-        var avaTransform = FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value.transform.GetComponent<Transform>();
+        string intro_location = FsmVariables.GlobalVariables.GetFsmString("fromDoor").Value;
+        var ava_transform = ODMObject.character_ava.transform.GetComponent<Transform>();
         float door_x = 0f;
-        switch (intoLocation)
+        switch (intro_location)
         {
             case "Map Right Path":
                 door_x = GameObject.Find("Map Left Path").GetComponent<Transform>().position.x + 3;
@@ -59,7 +69,7 @@ public class levelLoader : MonoBehaviour
                 door_x = GameObject.Find("Map Left Door").GetComponent<Transform>().position.x + 3;
                 break;
         }
-        avaTransform.position = new Vector3(door_x, 0, 0);
+        ava_transform.position = new Vector3(door_x, 0, 0);
     }
 
 }

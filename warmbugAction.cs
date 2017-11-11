@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using Assets.Script.ODM_Widget;
 
 public class warmbugAction : MonoBehaviour
 {
     public string warmbug_name;
-    public string warmbug_guid = "Default Name";
+    public string warmbug_guid = "Default GUID";
     public float warmbug_hp = 0;
     public float sp_bonus = 0;
     public float armor_creak = 0;
@@ -21,7 +22,7 @@ public class warmbugAction : MonoBehaviour
     public bool soloBug = false;
 
     private warmbugLair ref_lair;
-    private ODM.lairInfo lair_info;
+    private lairInfo lair_info;
     private PlayMakerFSM healthFSM;
     private PlayMakerFSM damageFSM;
     private PlayMakerFSM warmbugAI_FSM;
@@ -30,14 +31,14 @@ public class warmbugAction : MonoBehaviour
     {
         if (soloBug)
         {
-            lair_info = new ODM.lairInfo();
+            lair_info = new lairInfo();
             getAbilitiesHealth();
             getAbilitiesDamage();
         }
 
     }
 
-    public void initilization(warmbugLair _lair, ODM.lairInfo _lair_info, bool isLiving)
+    public void initilization(warmbugLair _lair, lairInfo _lair_info, bool isLiving)
     {
         ref_lair = _lair;
         lair_info = _lair_info;
@@ -46,7 +47,7 @@ public class warmbugAction : MonoBehaviour
         getAbilitiesDamage();
     }
 
-        public string getName()
+    public string getName()
     {
         return warmbug_name;
     }
@@ -135,8 +136,7 @@ public class warmbugAction : MonoBehaviour
         else
         {
             if (!soloBug)
-                ODM.errorLog(transform.name,
-                    "getAbilitiesDamage Missing LairInfo","");
+                ODM.errorLog(transform.name,"getAbilitiesDamage Missing LairInfo", "");
         }
     }
 }

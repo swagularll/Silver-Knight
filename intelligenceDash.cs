@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HutongGames.PlayMaker;
 using System;
+using Assets.Script.ODM_Widget;
 
 public class intelligenceDash : MonoBehaviour
 {
@@ -242,7 +243,7 @@ public class intelligenceDash : MonoBehaviour
                 //flagName: [NAME] => NAME
                 string flagName = txtContent[i].Substring(1, txtContent[i].IndexOf("]") - 1);
                 d.Key = flagName.Replace("\r", "").Replace("\n", "");//FileName: [INT1] => INT1
-                d.Unlocked = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<eventCenter>().getFlagBool(flagName);
+                d.Unlocked = ODMObject.event_manager.GetComponent<eventCenter>().getFlagBool(flagName);
                 d.Name = txtContent[i].Replace("[" + flagName + "]", "");//FileName: [intelligence02] => intelligence02
                 i++;
 
@@ -371,7 +372,7 @@ public class intelligenceDash : MonoBehaviour
     {
         for (int i = 0; i < intelligenceCollection.Count; i++)
         {
-            intelligenceCollection[i].Unlocked = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<eventCenter>().getFlagBool(intelligenceCollection[i].Key);
+            intelligenceCollection[i].Unlocked = ODMObject.event_manager.GetComponent<eventCenter>().getFlagBool(intelligenceCollection[i].Key);
         }
     }
     private void updateListPageText()

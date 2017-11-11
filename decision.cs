@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
 
 public class decision : MonoBehaviour {
 
@@ -9,9 +10,9 @@ public class decision : MonoBehaviour {
 
     private void makeDecision()
     {
-        fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value, "Scene Controller").SendEvent("start hold");
+        fsmHelper.getFsm(ODMObject.event_manager,ODMVariable.fsm_scene_controller).SendEvent("start hold");
         FsmVariables.GlobalVariables.GetFsmBool("isOnEvent").Value = true;
-        string msg = (new ODM()).getTranslaton("confirm save zarker");
+        string msg = dataWidget.getTranslaton("confirm save zarker");
 
         FsmVariables.GlobalVariables.GetFsmGameObject("obj_ConfirmPanel").Value.GetComponent<confirmPanel>().
             showConfirmation(transform.gameObject, "afterDecision", "stay away", "save zarker" , msg);

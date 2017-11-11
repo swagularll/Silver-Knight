@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using Assets.Script.ODM_Widget;
 
 public class confirmPanel : MonoBehaviour
 {
@@ -28,8 +29,8 @@ public class confirmPanel : MonoBehaviour
     public void showConfirmation(GameObject _sender, string _senderReplyMethodName,
         string msgText)
     {
-        txtLeft.GetComponent<Text>().text = odm.getTranslaton("cancel"); //default
-        txtRight.GetComponent<Text>().text = odm.getTranslaton("confirm");//default
+        txtLeft.GetComponent<Text>().text = dataWidget.getTranslaton("cancel"); //default
+        txtRight.GetComponent<Text>().text = dataWidget.getTranslaton("confirm");//default
         txtMessage.GetComponent<Text>().text = msgText;
 
         sender = _sender;
@@ -40,8 +41,8 @@ public class confirmPanel : MonoBehaviour
         string _leftButtonKey, string _rightButtonKey, string msgText)//default: left-No, right-Yes
     {
 
-        txtLeft.GetComponent<Text>().text = odm.getTranslaton(_leftButtonKey); //default
-        txtRight.GetComponent<Text>().text = odm.getTranslaton(_rightButtonKey);//default
+        txtLeft.GetComponent<Text>().text = dataWidget.getTranslaton(_leftButtonKey); //default
+        txtRight.GetComponent<Text>().text = dataWidget.getTranslaton(_rightButtonKey);//default
         txtMessage.GetComponent<Text>().text = msgText;
 
         sender = _sender;

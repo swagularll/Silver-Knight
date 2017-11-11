@@ -54,38 +54,38 @@ public class endingConclusion : MonoBehaviour
     }
     public void getConclusion()
     {
-        ODM.diaryLog data = transform.GetComponent<diary>().data_body;
-        //transform.GetComponent<diary>().endDiary();
+        //diaryLog data = GetComponent<diarySystem>().getDiary();
+        ////transform.GetComponent<diary>().endDiary();
 
-        //finished_ending
-        //Set by ending object
+        ////finished_ending
+        ////Set by ending object
 
-        //ending_count
-        dataContent.setEndingCount();
+        ////ending_count
+        //dataContent.setEndingCount();
 
-        //gaming_time
-        TimeSpan ts = TimeSpan.FromSeconds(data.time_count);
-        PlayerPrefs.SetString("gaming_time", string.Format("{0:00}:{1:00}:{2:00}", ts.TotalHours, ts.Minutes, ts.Seconds));
+        ////gaming_time
+        //TimeSpan ts = TimeSpan.FromSeconds(data.time_count);
+        //PlayerPrefs.SetString("gaming_time", string.Format("{0:00}:{1:00}:{2:00}", ts.TotalHours, ts.Minutes, ts.Seconds));
 
-        //exploration_rate
-        string str_exploration_rate = transform.GetComponent<mapDash>().getExlorationRateString();
-        PlayerPrefs.SetString("exploration_rate", str_exploration_rate);
+        ////exploration_rate
+        //string str_exploration_rate = transform.GetComponent<mapDash>().getExlorationRateString();
+        //PlayerPrefs.SetString("exploration_rate", str_exploration_rate);
 
-        //M data
-        //requires translation...
-        PlayerPrefs.SetString("death_count", data.dead_count.ToString());
-        PlayerPrefs.SetString("best_death", data.get_best_death());
-        PlayerPrefs.SetString("best_death_count", data.get_best_death_count().ToString());
-        PlayerPrefs.SetString("mate_count", data.get_mate_count());
-        PlayerPrefs.SetString("best_mate", data.get_best_mate());
-        PlayerPrefs.SetString("best_mate_count", data.get_best_mate_count().ToString());
-        PlayerPrefs.SetString("climax_count", data.get_climax_count().ToString());
-        PlayerPrefs.SetString("best_climax", data.get_best_climax());
-        PlayerPrefs.SetString("best_climax_count", data.get_best_climax_count().ToString());
-        PlayerPrefs.SetString("feed_count", data.get_feed_count().ToString());
-        PlayerPrefs.SetString("best_feed", data.get_best_feed());
-        PlayerPrefs.SetString("best_feed_success", data.get_best_feed_success());
-        PlayerPrefs.SetString("best_feed_failure", data.get_best_feed_failure());
+        ////M data
+        ////requires translation...
+        //PlayerPrefs.SetString("death_count", data.dead_count.ToString());
+        //PlayerPrefs.SetString("best_death", data.get_best_death());
+        //PlayerPrefs.SetString("best_death_count", data.get_best_death_count().ToString());
+        //PlayerPrefs.SetString("mate_count", data.get_mate_count());
+        //PlayerPrefs.SetString("best_mate", data.get_best_mate());
+        //PlayerPrefs.SetString("best_mate_count", data.get_best_mate_count().ToString());
+        //PlayerPrefs.SetString("climax_count", data.get_climax_count().ToString());
+        //PlayerPrefs.SetString("best_climax", data.get_best_climax());
+        //PlayerPrefs.SetString("best_climax_count", data.get_best_climax_count().ToString());
+        //PlayerPrefs.SetString("feed_count", data.get_feed_count().ToString());
+        //PlayerPrefs.SetString("best_feed", data.get_best_feed());
+        //PlayerPrefs.SetString("best_feed_success", data.get_best_feed_success());
+        //PlayerPrefs.SetString("best_feed_failure", data.get_best_feed_failure());
     }
 
     class gameLog

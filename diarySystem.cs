@@ -1,72 +1,68 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.IO;
-using System.Text;
-using System.Collections.Generic;
+﻿using Assets.Script.ODM_Widget;
 using HutongGames.PlayMaker;
-using LitJson;
-using System;
-using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public class diary : MonoBehaviour
+public class diarySystem : MonoBehaviour
 {
     private bool isReady = false;
-    public ODM.diaryLog data_body;
+    public diaryLog diary_log;
 
     void Start()
     {
-        ODM.diaryLog data_body = new ODM.diaryLog();
+        diary_log = new diaryLog();
     }
     void Update()
     {
         //if (isReady)
         //{
-        //    data_body.time_count += Time.deltaTime;
+        //    diary_log.time_count += Time.deltaTime;
         //}
     }
 
-    //public string getDiaryString()
-    //{
-    //   return data_body.getString();
-    //}
+    public diaryLog getDiary()
+    {
+        return diary_log;
+    }
 
     #region OUTCALL FUNCTIONS
     public void addResist()
     {
         string materName = FsmVariables.GlobalVariables.GetFsmGameObject("currentMate").Value.GetComponent<warmbugAction>().warmbug_name;
-        data_body.resist.Add(materName);
+        diary_log.resist.Add(materName);
     }
 
     public void addFeed()
     {
         string materName = FsmVariables.GlobalVariables.GetFsmGameObject("currentMate").Value.GetComponent<warmbugAction>().warmbug_name;
-        data_body.feed.Add(materName);
+        diary_log.feed.Add(materName);
     }
 
     public void addResistFailed()
     {
         string materName = FsmVariables.GlobalVariables.GetFsmGameObject("currentMate").Value.GetComponent<warmbugAction>().warmbug_name;
-        data_body.resist_failed.Add(materName);
+        diary_log.resist_failed.Add(materName);
     }
     public void addResistSuccess()
     {
         string materName = FsmVariables.GlobalVariables.GetFsmGameObject("currentMate").Value.GetComponent<warmbugAction>().warmbug_name;
-        data_body.resist_success.Add(materName);
+        diary_log.resist_success.Add(materName);
     }
     public void addFeedFailed()
     {
         string materName = FsmVariables.GlobalVariables.GetFsmGameObject("currentMate").Value.GetComponent<warmbugAction>().warmbug_name;
-        data_body.feed_failed.Add(materName);
+        diary_log.feed_failed.Add(materName);
     }
     public void addFeedSuccess()
     {
         string materName = FsmVariables.GlobalVariables.GetFsmGameObject("currentMate").Value.GetComponent<warmbugAction>().warmbug_name;
-        data_body.feed_success.Add(materName);
+        diary_log.feed_success.Add(materName);
     }
 
     public void addDeadCount()
     {
-        data_body.dead_count += 1;
+        diary_log.dead_count += 1;
         addKillerName();
     }
 
@@ -76,9 +72,9 @@ public class diary : MonoBehaviour
         {
             GameObject killer = FsmVariables.GlobalVariables.GetFsmGameObject("currentMate").Value;
             string killerName = killer.GetComponent<warmbugAction>().warmbug_name;
-            data_body.killer_name.Add(killerName);
+            diary_log.killer_name.Add(killerName);
         }
-        (new ODM.saveRecord()).updateDiary(data_body);
+        (new saveRecord()).updateDiary(diary_log);
     }
     #endregion
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
 
 public class cameraControl : MonoBehaviour
 {
@@ -63,7 +64,7 @@ public class cameraControl : MonoBehaviour
     public void setCameraAva()
     {
         isTracing = false;
-        float avaPositionX = FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value.transform.position.x;
+        float avaPositionX = ODMObject.character_ava.transform.position.x;
         finalLocation = new Vector3(avaPositionX, transform.position.y, transform.position.z);
         iTween.MoveTo(transform.gameObject, iTween.Hash("position", finalLocation, "easetype", iTween.EaseType.easeInOutSine, "time", 1f));
     }
@@ -76,7 +77,7 @@ public class cameraControl : MonoBehaviour
     public void setCameraDefault()
     {
         //target = null;
-        transform.SetParent(FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value.transform);
+        transform.SetParent(ODMObject.character_ava.transform);
         isTracing = true;
     }
 

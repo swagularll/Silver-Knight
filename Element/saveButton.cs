@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UI;
 using LitJson;
+using Assets.Script.ODM_Widget;
+using System;
 
 public class saveButton : MonoBehaviour {
 
@@ -28,12 +30,13 @@ public class saveButton : MonoBehaviour {
     public void initilizeData(ODM.ODMDictionary db)
     {
         setAlive();
-        ani = GetComponent<Animator>();
         saveFileGUID = db.getValue("save_id");
         saveFileCreatedTime = db.getValue("save_created_time");
         savedScene = db.getValue("saved_scene");
 
-        string difficulty = (new ODM()).getTranslaton(ODM.getDifficultyText(PlayerPrefs.GetInt("game_difficulty")));
+        int int_difficulty = Int32.Parse(db.getValue("game_difficulty")); 
+
+        string difficulty = dataWidget.getTranslaton(dataWidget.getDifficultyText(int_difficulty));
         string sceneName = map_database_holder.GetComponent<MapDatabase>().getMap(savedScene).title;
 
         text_difficulty.transform.GetComponent<Text>().text = difficulty;

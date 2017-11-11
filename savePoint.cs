@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using LitJson;
+using Assets.Script.ODM_Widget;
 
 public class savePoint : MonoBehaviour
 {
@@ -20,9 +21,13 @@ public class savePoint : MonoBehaviour
 
         ODM.ODMDictionary dict_save_data = getSaveData(save_id);
         ODM.ODMDictionary dict_flag_collection = GetComponent<eventCenter>().flag_collection;
-        ODM.diaryLog diary_log = GetComponent<diary>().data_body;
-        
-        ODM.saveRecord instance_save_record = new ODM.saveRecord(save_id, dict_save_data, dict_flag_collection, diary_log);
+        diaryLog diary_log = ODMObject.event_manager.GetComponent<diarySystem>().getDiary();
+
+        ODM.ODMDictionary lair_info_collection = ODMObject.event_manager.GetComponent<warmbugLairManager>().getWarmbugDistribution();
+        List<itemManager.itemInfo> item_collection = ODMObject.event_manager.GetComponent<itemManager>().getItemDistribution();
+
+        //Generates saveRecord by collecting data from different scripts
+        saveRecord instance_save_record = new saveRecord(save_id, dict_save_data, dict_flag_collection, diary_log, lair_info_collection, item_collection);
         instance_save_record.saveProgress(instance_save_record);
 
         //display message
@@ -42,7 +47,7 @@ public class savePoint : MonoBehaviour
         string save_created_time = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
 
         string saved_scene = Application.loadedLevelName;
-        string game_difficulty = PlayerPrefs.GetString("game_difficulty");
+        string game_difficulty = PlayerPrefs.GetInt("game_difficulty").ToString();
         string move_speed = FsmVariables.GlobalVariables.GetFsmFloat("move_speed").Value.ToString();
 
         string status_armor = FsmVariables.GlobalVariables.GetFsmBool("status_armor").Value.ToString();
@@ -52,12 +57,12 @@ public class savePoint : MonoBehaviour
 
         string ava_current_health = FsmVariables.GlobalVariables.GetFsmFloat("ava_current_health").Value.ToString();
         string ava_current_sp = FsmVariables.GlobalVariables.GetFsmFloat("ava_current_sp").Value.ToString();
-        string ava_current_poison = FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value.transform.position.x.ToString();
+        string ava_current_poison = ODMObject.character_ava.transform.position.x.ToString();
         //FsmVariables.GlobalVariables.GetFsmFloat("ava_current_poison").Value.ToString();
 
-        string ava_current_position = FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value.transform.position.x.ToString();
+        string ava_current_position = ODMObject.character_ava.transform.position.x.ToString();
         string current_bullets = FsmVariables.GlobalVariables.GetFsmInt("current_bullets").Value.ToString();
-        string inventory_collection_string = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<inventoryDash>().getItemArray();
+        string inventory_collection_string = ODMObject.event_manager.GetComponent<inventoryDash>().getItemArray();
 
         dict_save_data.add("save_id", save_id);
         dict_save_data.add("save_created_time", save_created_time);
@@ -88,11 +93,11 @@ public class savePoint : MonoBehaviour
 
     public void setSupplyFull()
     {
-        GameObject _ava = FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value;
+        GameObject _ava = ODMObject.character_ava;
 
         fsmHelper.getFsm(_ava, "Player Control").enabled = true;
         fsmHelper.getFsm(_ava, "Player Control Disabled").enabled = false;
-        fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value, "Player Control Disabled").
+        fsmHelper.getFsm(ODMObject.character_ava, "Player Control Disabled").
                 FsmVariables.GetFsmBool("is_hurt_start").Value = true;
 
         FsmVariables.GlobalVariables.GetFsmBool("status_armor").Value = true;
@@ -106,7 +111,7 @@ public class savePoint : MonoBehaviour
         FsmVariables.GlobalVariables.GetFsmFloat("ava_current_sp").Value = 100f;
         FsmVariables.GlobalVariables.GetFsmFloat("ava_current_poison").Value = 0f;//this is POISON, not POSITION
 
-        FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<inventoryDash>().addSupplyFull();
+        ODMObject.event_manager.GetComponent<inventoryDash>().addSupplyFull();
 
         createSaveRecored(true);
         Debug.Log("Save record created");

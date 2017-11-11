@@ -1,22 +1,80 @@
 ﻿using UnityEngine;
 using System.Collections;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
+using System.Collections.Generic;
 
 public class afterLoad : MonoBehaviour
 {
-    private GameObject eventManager;
-    private eventCenter eventCenter;
+    public List<GameObject> item_entity_collection;
+    public List<GameObject> event_entity_collection;
 
+    //For scene drag
+    public GameObject obj_warmbug_lair;
+    
+
+    private warmbugLair level_warmbug_lair;
+    private eventCenter event_center;
+    private itemManager item_manager;
+
+    private string map_display_text;
+    private string stage_flag_name;
+
+    private void Awake()
+    {
+        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
+        item_manager = ODMObject.event_manager.GetComponent<itemManager>();
+        level_warmbug_lair = obj_warmbug_lair.GetComponent<warmbugLair>();
+
+        //item_entity_collection = new List<GameObject>();
+        //event_entity_collection = new List<GameObject>();
+
+        CMap currentMap = ODMObject.event_manager.GetComponent<MapDatabase>().getMap(Application.loadedLevelName);
+        map_display_text = currentMap.name + " " + currentMap.title;
+        stage_flag_name = "Area " + Application.loadedLevelName;
+    }
     void Start()
     {
-        eventManager = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value;
-        eventCenter = eventManager.GetComponent<eventCenter>();
-        CMap currentMap = eventManager.GetComponent<MapDatabase>().getMap(Application.loadedLevelName);
-        string mapDisplayText = currentMap.name + " " + currentMap.title;
-        eventCenter.renewLocation(mapDisplayText);
-        string stageFlagName = "Area" + Application.loadedLevelName;
-        eventCenter.setFlagTrue(stageFlagName);
-        fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value, "Fade").SendEvent("fade in");
-        fsmHelper.getFsm(transform.gameObject,"FSM").SendEvent("broadcast ready");
+        event_center.renewLocation(map_display_text);
+
+        if (!event_center.getFlagBool(stage_flag_name))//When player first time entering the level.
+        {
+            //Set area flag true
+            event_center.setFlagTrue(stage_flag_name);
+
+            //Register local level warmbugs & items
+            level_warmbug_lair.registerLevelLair();
+            this.registerAllLevelItems();
+        }
+
+        //check if there is any event running
+        if (!checkEventOccupation()) //Release Warmbugs
+        {
+            level_warmbug_lair.releaseWarmbugs();
+        }
+        fsmHelper.getFsm(ODMObject.event_manager, "Fade").SendEvent("fade in");
+        fsmHelper.getFsm(transform.gameObject, "FSM").SendEvent("broadcast ready");//do some modification on this shit
     }
+
+    private bool checkEventOccupation()
+    {
+        for (int i = 0; i < event_entity_collection.Count; i++)
+        {
+            //initializing event
+            bool on_event = event_entity_collection[i].GetComponent<eventFlagChecker>().initialization();
+            if (on_event)
+                return true;
+        }
+        return false;
+    }
+
+    private void registerAllLevelItems()
+    {
+        for (int i = 0; i < item_entity_collection.Count; i++)
+        {
+            item_manager.registerItem(Application.loadedLevelName, item_entity_collection[i]);
+        }
+
+    }
+
 }

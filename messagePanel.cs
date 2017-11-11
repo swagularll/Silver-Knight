@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using Assets.Script.ODM_Widget;
 
 public class messagePanel : MonoBehaviour
 {
@@ -24,7 +25,7 @@ public class messagePanel : MonoBehaviour
     public void showMessage(string msgText)
     {
         senderReplyMethodName = null;
-        txtMessage.GetComponent<Text>().text = (new ODM()).getTranslaton(msgText);
+        txtMessage.GetComponent<Text>().text = dataWidget.getTranslaton(msgText);
         messagePanelFSM.SendEvent("show message");
     }
 

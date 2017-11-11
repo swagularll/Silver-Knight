@@ -6,6 +6,7 @@ using HutongGames.PlayMaker;
 using System;
 using System.Linq;
 using LitJson;
+using Assets.Script.ODM_Widget;
 
 public class inventoryDash : MonoBehaviour
 {
@@ -426,13 +427,13 @@ public class inventoryDash : MonoBehaviour
             confirmCheck = true; //For state control, will automatically turn on with inventoryPanelEnabled
             inventoryPanelEnabled = false;
 
-            string msg = (new ODM()).getTranslaton("confirm use item sure", inventoryCollection[currentIndex].title);
+            string msg = dataWidget.getTranslaton("confirm use item sure", inventoryCollection[currentIndex].title);
 
             if (inventoryCollection[currentIndex].id == (int)inventoryItem.refined_lactation ||
                     inventoryCollection[currentIndex].id == (int)inventoryItem.semen_of_mecb ||
                     inventoryCollection[currentIndex].id == (int)inventoryItem.ambusher_semen)
             {
-                msg = (new ODM()).getTranslaton("eat item", inventoryCollection[currentIndex].title);
+                msg = dataWidget.getTranslaton("eat item", inventoryCollection[currentIndex].title);
             }
             FsmVariables.GlobalVariables.GetFsmGameObject("obj_ConfirmPanel").Value.GetComponent<confirmPanel>().
                 showConfirmation(transform.gameObject, "onReply_useItem", msg);
@@ -451,7 +452,7 @@ public class inventoryDash : MonoBehaviour
                 case (int)inventoryItem.beacon_of_the_esf:
                     checkAndTakeAway(inventoryCollection[currentIndex].id);
                     //inventoryPanelEnabled = true;//???
-                    GameObject ava = FsmVariables.GlobalVariables.GetFsmGameObject("Ava").Value;
+                    GameObject ava = ODMObject.character_ava;
                     GameObject _saveBeacon = Instantiate(saveBeacon);
                     _saveBeacon.transform.position = new Vector3(ava.transform.position.x, saveBeacon.transform.position.y, saveBeacon.transform.position.z);
                     //GetComponent<menuManager>().openMenu();

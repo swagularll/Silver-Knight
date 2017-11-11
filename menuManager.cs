@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
 
 public class menuManager : MonoBehaviour
 {
@@ -73,14 +74,14 @@ public class menuManager : MonoBehaviour
         if (!isOpen)
         {
             startMenu();
-            fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value, "Scene Controller").SendEvent("start menu hold");
+            fsmHelper.getFsm(ODMObject.event_manager, ODMVariable.fsm_scene_controller).SendEvent("start menu hold");
             isOpen = tabSwitch = true;
             GameObject.Find("Player Condition Panel").GetComponent<Menu>().isOpen = false;
         }
         else
         {
             closeMenu();
-            fsmHelper.getFsm(FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value, "Scene Controller").SendEvent("end menu hold");
+            fsmHelper.getFsm(ODMObject.event_manager, ODMVariable.fsm_scene_controller).SendEvent("end menu hold");
             isOpen = tabSwitch = false;
             GameObject.Find("Player Condition Panel").GetComponent<Menu>().isOpen = true;
 

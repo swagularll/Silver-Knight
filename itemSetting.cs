@@ -2,81 +2,81 @@
 using System.Collections;
 using System;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
 
 public class itemSetting : MonoBehaviour
 {
-    public bool isWarmbugItem = false; //item does not managed by flags
-    public string flagName;//normal item will require a flag to avoid multiple pick up
-    public inventoryDash.inventoryItem itemEntity = inventoryDash.inventoryItem.none;
-    public int itemAmount = 1;
-    public bool isDocument = false;
-    public string linkedFSM = "FSM";
+    //Add count down for item to dispear.XXX
 
-    private string defaultMsg = "showGetItem";//picked up [item]
-    public string specialPickupMsg = "";//show special message when picking up an item
+    //public bool is_warmbug_item = false; //item does not managed by flags
+    public string flag_name;
+    public inventoryDash.inventoryItem catalog_code;
+    public int item_amount = 1;
+    public bool is_document = false;
+    public string linked_fsm = "FSM";
+    public string special_collect_msg = "";//show special message when picking up an item
 
-    private eventCenter eventCenter;
-    private dialogPanel dialogue;
-    private CDocument document;
-    private ItemDatabase itemDB;
-    private inventoryDash inventoryDash;
+    private string default_collect_msg = "showGetItem";//picked up [item]
+    private eventCenter event_center;
+    private dialogPanel dialogue_panel;
+    private CDocument c_document;
+    private ItemDatabase item_db;
+    private inventoryDash inventory_dash;
+
+
+    private void Awake()
+    {
+        catalog_code = inventoryDash.inventoryItem.none;
+    }
 
     private void tryPickUpItem()//Add item, set event callback reference
     {
-        if (!String.IsNullOrEmpty(flagName) || isWarmbugItem)
+        if (is_document)
         {
-            if (isDocument)
-            {
-                document = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<documentDash>().getDocument(flagName.Trim());
-                dialogue.currentSlotItem = document.Name.Trim();//For replacing [INPUT]
-            }
-            else
-            {
-                int itemID = (int)itemEntity;
-                if (itemID != -1)
-                {
-                    dialogue.currentSlotItem = itemDB.getItem(itemID).title.Trim();
-                    if (itemAmount == 0)
-                        inventoryDash.addItem(itemID);
-                    else
-                    {
-                        if (itemID == (int)inventoryDash.inventoryItem.device_battery)
-                            itemID = (int)inventoryDash.inventoryItem.little_bastard;
-                        inventoryDash.addItem(itemID, itemAmount);
-                    }
-                }
-                else
-                    ODM.log(transform.name,  "itemSetting missing itemID.");
-            }
+            c_document = ODMObject.event_manager.GetComponent<documentDash>().getDocument(flag_name.Trim());
+            dialogue_panel.currentSlotItem = c_document.Name.Trim();//For replacing [INPUT] => ???
         }
         else
-            ODM.log(transform.name,  "itemSetting missing flagName.");
+        {
+            int itemID = (int)catalog_code;
+            if (itemID != -1)
+            {
+                dialogue_panel.currentSlotItem = item_db.getItem(itemID).title.Trim();
+                if (item_amount == 0)
+                    inventory_dash.addItem(itemID);
+                else
+                {
+                    if (itemID == (int)inventoryDash.inventoryItem.device_battery)
+                        itemID = (int)inventoryDash.inventoryItem.little_bastard;
+                    inventory_dash.addItem(itemID, item_amount);
+                }
+            }
+            else
+            { 
+                ODM.errorLog(transform.name, "itemSetting missing itemID.", "");
+            }
+        }
     }
-    public void scriptSetting()
+
+    //Will only be called when object generates
+    public void initilaization()
     {
-        if (!String.IsNullOrEmpty(specialPickupMsg))
-            defaultMsg = specialPickupMsg.Trim();
+        if (!String.IsNullOrEmpty(special_collect_msg))
+            default_collect_msg = special_collect_msg.Trim();
 
-        eventCenter = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<eventCenter>();
-        dialogue = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<dialogPanel>();
-        itemDB = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<ItemDatabase>();
-        inventoryDash = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value.GetComponent<inventoryDash>();
+        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
+        dialogue_panel = ODMObject.event_manager.GetComponent<dialogPanel>();
+        item_db = ODMObject.event_manager.GetComponent<ItemDatabase>();
+        inventory_dash = ODMObject.event_manager.GetComponent<inventoryDash>();
 
-        PlayMakerFSM fsm = fsmHelper.getFsm(transform.gameObject, linkedFSM.Trim());
-        fsm.FsmVariables.GetFsmString("msgFlagName").Value = defaultMsg.Trim();
-        fsm.FsmVariables.GetFsmString("flagName").Value = flagName.Trim();
-        fsm.FsmVariables.GetFsmString("fsmName").Value = linkedFSM.Trim();
+        PlayMakerFSM fsm = fsmHelper.getFsm(transform.gameObject, linked_fsm.Trim());
+        fsm.FsmVariables.GetFsmString("msg_flag_name").Value = default_collect_msg.Trim();
+        fsm.FsmVariables.GetFsmString("fsm_fame").Value = linked_fsm.Trim();
         fsm.FsmVariables.GetFsmGameObject("self").Value = transform.gameObject;
 
+        if (!String.IsNullOrEmpty(flag_name))
+            fsm.FsmVariables.GetFsmString("flag_name").Value = flag_name.Trim();
 
-        if (!isWarmbugItem)
-        {
-            bool isDone = eventCenter.getFlagBool(flagName);//check if item already been picked up
-            if (isDone)
-                DestroyObject(transform.gameObject);
-        }
-        fsm.SendEvent("document ready");
-
-
+        fsm.SendEvent("script ready");
     }
 }

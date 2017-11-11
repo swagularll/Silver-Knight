@@ -62,7 +62,7 @@ public class dialogPanel : MonoBehaviour
     public void showMessage(string _flagName)
     {
         GetComponent<actionControl>().setIdle();
-        fsmHelper.getFsm(transform.gameObject, "Scene Controller").SendEvent("start hold");
+        fsmHelper.getFsm(transform.gameObject, ODMVariable.fsm_scene_controller).SendEvent("start hold");
         FsmVariables.GlobalVariables.GetFsmBool("isOnEvent").Value = true;
         FsmVariables.GlobalVariables.GetFsmGameObject("obj_player_status_panel").Value.GetComponent<Animator>().SetBool("isOpen", false);
 
@@ -149,7 +149,7 @@ public class dialogPanel : MonoBehaviour
         isOpen = false;
         FsmVariables.GlobalVariables.GetFsmGameObject("obj_player_status_panel").Value.GetComponent<Animator>().SetBool("isOpen", true);
         FsmVariables.GlobalVariables.GetFsmGameObject("conversationPanel").Value.GetComponent<UISlider>().isOpen = false;
-        fsmHelper.getFsm(transform.gameObject, "Scene Controller").SendEvent("end hold");
+        fsmHelper.getFsm(transform.gameObject, ODMVariable.fsm_scene_controller).SendEvent("end hold");
         fsmHelper.getFsm(transform.gameObject, "Dialog").SendEvent("end dialog");
     }
     #endregion

@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using HutongGames.PlayMaker;
 using System;
+using Assets.Script.ODM_Widget;
 
 public class mapSquare : MonoBehaviour
 {
@@ -47,7 +48,7 @@ public class mapSquare : MonoBehaviour
     private Animator ani;
     void Start()
     {
-        eventManager = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value;
+        eventManager = ODMObject.event_manager;
         UiInfomationHolder uiInfo = FsmVariables.GlobalVariables.GetFsmGameObject("Language Translator").Value.GetComponent<UiInfomationHolder>();
 
         txt_selectedLocation = uiInfo.getText("Map Info selectedLocation");
@@ -62,7 +63,7 @@ public class mapSquare : MonoBehaviour
 
 
         generateInfo();
-        state = eventManager.GetComponent<eventCenter>().getFlagBool("Area" + selfRef.name);
+        state = eventManager.GetComponent<eventCenter>().getFlagBool("Area " + selfRef.name);
         ani = GetComponent<Animator>();
     }
 

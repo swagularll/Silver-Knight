@@ -6,6 +6,7 @@ using System.Net.NetworkInformation;
 using System.Linq;
 using LitJson;
 using System.Xml;
+using Assets.Script.ODM_Widget;
 
 public class systemLoader : MonoBehaviour
 {
@@ -61,7 +62,7 @@ public class systemLoader : MonoBehaviour
                 //Read configuration from a txt file
                 StreamReader sr = new StreamReader(setting_files);
                 string sr_json = sr.ReadLine();
-                ODM.systemConfiguration system_configuration = new ODM.systemConfiguration(ODM.decryption(sr_json));
+                systemConfiguration system_configuration = new systemConfiguration(ODM.decryption(sr_json));
                 sr.Close();
 
                 PlayerPrefs.SetString("player_nick_name", system_configuration.player_nick_name);

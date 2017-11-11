@@ -2,11 +2,12 @@
 using System.Collections;
 using System;
 using HutongGames.PlayMaker;
+using Assets.Script.ODM_Widget;
 
 public class mapSetting : MonoBehaviour
 {
     public inventoryDash.inventoryItem requiredItem;
-    public string successfulMsg = "showOpenDoor";
+    public string successfulMsg;
 
     public bool isElectricalDoor = false;
     public bool allowAutoItem = true;
@@ -32,9 +33,11 @@ public class mapSetting : MonoBehaviour
 
     void Start()
     {
+
+        successfulMsg = "showOpenDoor";
         requiredItem = inventoryDash.inventoryItem.none;
 
-        eventManager = FsmVariables.GlobalVariables.GetFsmGameObject("event manager").Value;
+        eventManager = ODMObject.event_manager;
 
         nextSceneName = setLocationString();
         flagName = identifyDoorFlagName();
