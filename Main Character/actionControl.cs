@@ -7,6 +7,7 @@ public class actionControl : MonoBehaviour
 {
 
     private fsmHelper fsmHelper;
+    private bool ava_status;
 
     void Start()
     {
@@ -139,7 +140,7 @@ public class actionControl : MonoBehaviour
         }
         else
         {
-            ODM.log(transform.name,  "Ava get killed. No current mate.");
+            ODM.log(transform.name, "Ava get killed. No current mate.");
             PlayMakerFSM fControl = fsmHelper.getFsm(ODMObject.character_ava, "Event");
             if (fControl.isActiveAndEnabled)
             {
@@ -212,5 +213,23 @@ public class actionControl : MonoBehaviour
     {
         var avaTransform = ODMObject.character_ava.transform.GetComponent<Transform>();
         avaTransform.position = new Vector3(_location_obj.transform.position.x, 0, 0);
+    }
+
+    public void enableControl()
+    {
+        PlayMakerFSM fsm =
+            FsmVariables.GlobalVariables.GetFsmBool("status_armor").Value ?
+            fsmHelper.getFsm(transform.gameObject, "Player Control") :
+            fsmHelper.getFsm(transform.gameObject, "Player Control Disabled");
+        fsm.SendEvent("resume FSM");
+    }
+    public void disableControl()
+    {
+        PlayMakerFSM fsm =
+            FsmVariables.GlobalVariables.GetFsmBool("status_armor").Value ?
+            fsmHelper.getFsm(transform.gameObject, "Player Control") :
+            fsmHelper.getFsm(transform.gameObject, "Player Control Disabled");
+        fsm.FsmVariables.GetFsmString("previous_state").Value = fsm.ActiveStateName;
+        fsm.SendEvent("hold FSM");
     }
 }

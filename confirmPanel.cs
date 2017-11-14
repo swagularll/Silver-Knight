@@ -11,9 +11,7 @@ public class confirmPanel : MonoBehaviour
     public GameObject txtRight;
     public GameObject txtMessage;
 
-    private ODM odm;
     private AudioSource aud;
-    private audioManager soundHelper;
 
     private GameObject sender;
     private string senderReplyMethodName;
@@ -21,8 +19,6 @@ public class confirmPanel : MonoBehaviour
     
     void Start()
     {
-        odm = new ODM();
-        soundHelper = new audioManager();
         aud = GetComponent<AudioSource>();
         confirmationFSM =  fsmHelper.getFsm(transform.gameObject, "FSM");
     }

@@ -7,17 +7,18 @@ using System.Collections.Generic;
 public class levelLoader : MonoBehaviour
 {
     public AudioClip sound_door_open;
-    public List<GameObject> local_item_collection;
     private eventCenter event_center;
     private AudioSource aud;
 
-    private void Awake()
+    private void InitialzeScript()
     {
         event_center = ODMObject.event_manager.GetComponent<eventCenter>();
         aud = GetComponent<AudioSource>();
     }
     void Start()
     {
+        InitialzeScript();
+
         //Open door sound
         aud.clip = sound_door_open;
 

@@ -44,7 +44,6 @@ public class inventoryDash : MonoBehaviour
     private int currentPage = 1;
     private int pageMax = 2;
 
-    private audioManager aud_manager;
     private AudioSource aud;
 
     public bool inventoryPanelEnabled = false; //inventory interacterable
@@ -104,7 +103,6 @@ public class inventoryDash : MonoBehaviour
         itemDB = GetComponent<ItemDatabase>();
         inventoryCollection = new List<item>();
         slotCollection = new List<GameObject>();
-        aud_manager = new audioManager();
 
         for (int i = 0; i < itemCollectionSize; i++)
         {
@@ -161,12 +159,12 @@ public class inventoryDash : MonoBehaviour
         //select first item and display
         if (inventoryPanelEnabled && !stateControl)
         {
-            aud.clip = Resources.Load<AudioClip>(aud_manager.electrical);
+            aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
             aud.Play();
             stateControl = true;//for the first time loading
             displayItem();
         }
-        else if (inventoryPanelEnabled && stateControl)//When the select function is enabled...
+        else if (inventoryPanelEnabled && stateControl && !FsmVariables.GlobalVariables.GetFsmBool("isSystemLock").Value)//When the select function is enabled...
         {
             if (Input.GetKeyDown(KeyCode.C))//Use a item
             {
@@ -185,13 +183,13 @@ public class inventoryDash : MonoBehaviour
             {
                 if (convertToSlotIndex() == slotCount - 1)
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                     displayItem();
 
                 }
                 else//select next item
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     currentIndex++;
                     displayItem();
                 }
@@ -207,7 +205,7 @@ public class inventoryDash : MonoBehaviour
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     aud.Play();
                     currentIndex--;
                     displayItem();
@@ -218,11 +216,11 @@ public class inventoryDash : MonoBehaviour
             {
                 if (currentPage == pageMax)
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     nextPage();
                 }
                 aud.Play();
@@ -233,11 +231,11 @@ public class inventoryDash : MonoBehaviour
             {
                 if (currentPage == 1)
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     previousPage();
                 }
                 aud.Play();
@@ -588,7 +586,7 @@ public class inventoryDash : MonoBehaviour
 
     public void closePanel()
     {
-        aud.clip = Resources.Load<AudioClip>(aud_manager.electricalExit);
+        aud.clip = Resources.Load<AudioClip>(audioManager.electricalExit);
         aud.Play();
         GetComponent<menuManager>().tabSwitch = true; //make the top tab goes back to previous state...
         stateControl = confirmCheck = inventoryPanelEnabled = false;

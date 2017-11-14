@@ -11,7 +11,7 @@ namespace Assets.Script.ODM_Widget
     {
         public static GameObject character_ava = FsmVariables.GlobalVariables.GetFsmGameObject(ODMVariable.obj_ava).Value;
         public static GameObject event_manager = FsmVariables.GlobalVariables.GetFsmGameObject(ODMVariable.obj_event_manager).Value;
-        
+
 
     }
 }

@@ -20,21 +20,21 @@ public class afterLoad : MonoBehaviour
     private string map_display_text;
     private string stage_flag_name;
 
-    private void Awake()
+    private void InitialzeScript()
     {
         event_center = ODMObject.event_manager.GetComponent<eventCenter>();
         item_manager = ODMObject.event_manager.GetComponent<itemManager>();
         level_warmbug_lair = obj_warmbug_lair.GetComponent<warmbugLair>();
 
-        //item_entity_collection = new List<GameObject>();
-        //event_entity_collection = new List<GameObject>();
-
         CMap currentMap = ODMObject.event_manager.GetComponent<MapDatabase>().getMap(Application.loadedLevelName);
         map_display_text = currentMap.name + " " + currentMap.title;
         stage_flag_name = "Area " + Application.loadedLevelName;
     }
+
     void Start()
     {
+        InitialzeScript();
+
         event_center.renewLocation(map_display_text);
 
         if (!event_center.getFlagBool(stage_flag_name))//When player first time entering the level.
@@ -52,8 +52,10 @@ public class afterLoad : MonoBehaviour
         {
             level_warmbug_lair.releaseWarmbugs();
         }
+        setItemReady();
+
         fsmHelper.getFsm(ODMObject.event_manager, "Fade").SendEvent("fade in");
-        fsmHelper.getFsm(transform.gameObject, "FSM").SendEvent("broadcast ready");//do some modification on this shit
+        //fsmHelper.getFsm(transform.gameObject, "FSM").SendEvent("broadcast ready");//do some modification on this shit
     }
 
     private bool checkEventOccupation()
@@ -72,9 +74,15 @@ public class afterLoad : MonoBehaviour
     {
         for (int i = 0; i < item_entity_collection.Count; i++)
         {
-            item_manager.registerItem(Application.loadedLevelName, item_entity_collection[i]);
+            item_manager.registerItem(item_entity_collection[i]);
         }
-
     }
 
+    private void setItemReady()
+    {
+        for (int i = 0; i < item_entity_collection.Count; i++)
+        {
+            item_entity_collection[i].GetComponent<itemSetting>().initilaization();
+        }
+    }
 }

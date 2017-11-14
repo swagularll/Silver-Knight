@@ -15,7 +15,7 @@ namespace Assets.Script.ODM_Widget
         public ODM.ODMDictionary flag_collection { get; set; }
         public diaryLog diary_log { get; set; }
         public ODM.ODMDictionary lair_info_collection { get; set; }
-        public List<itemManager.itemInfo> item_collection { get; set; }
+        public List<itemSetting.itemInfo> item_collection { get; set; }
 
         public saveRecord()
         {
@@ -25,7 +25,7 @@ namespace Assets.Script.ODM_Widget
             this.flag_collection = new ODM.ODMDictionary(str_flag);
             this.diary_log = new diaryLog();
             this.lair_info_collection = new ODM.ODMDictionary();
-            this.item_collection = new List<itemManager.itemInfo>();
+            this.item_collection = new List<itemSetting.itemInfo>();
         }
         public saveRecord(string json_string)
         {
@@ -35,11 +35,11 @@ namespace Assets.Script.ODM_Widget
             this.flag_collection = new ODM.ODMDictionary(dic.getValue("flag_collection"));
             this.diary_log = new diaryLog(dic.getValue("diary_log"));
             this.lair_info_collection = new ODM.ODMDictionary(dic.getValue("lair_info_collection"));
-            this.item_collection = JsonMapper.ToObject<List<itemManager.itemInfo>>(dic.getValue("item_collection"));
+            this.item_collection = JsonMapper.ToObject<List<itemSetting.itemInfo>>(dic.getValue("item_collection"));
         }
 
         public saveRecord(string _id, ODM.ODMDictionary _save_data, ODM.ODMDictionary _flag_collection,
-            diaryLog _diary_log, ODM.ODMDictionary _lair_info_collection, List<itemManager.itemInfo> _item_collection)
+            diaryLog _diary_log, ODM.ODMDictionary _lair_info_collection, List<itemSetting.itemInfo> _item_collection)
         {
             this.id = _id;
             this.save_data = _save_data;

@@ -24,7 +24,7 @@ public class savePoint : MonoBehaviour
         diaryLog diary_log = ODMObject.event_manager.GetComponent<diarySystem>().getDiary();
 
         ODM.ODMDictionary lair_info_collection = ODMObject.event_manager.GetComponent<warmbugLairManager>().getWarmbugDistribution();
-        List<itemManager.itemInfo> item_collection = ODMObject.event_manager.GetComponent<itemManager>().getItemDistribution();
+        List<itemSetting.itemInfo> item_collection = ODMObject.event_manager.GetComponent<itemManager>().getItemDistribution();
 
         //Generates saveRecord by collecting data from different scripts
         saveRecord instance_save_record = new saveRecord(save_id, dict_save_data, dict_flag_collection, diary_log, lair_info_collection, item_collection);

@@ -20,7 +20,6 @@ public class mapDash : MonoBehaviour
     private int currentSelectedX = -1;
     private int currentSelectedY = -1;
 
-    private audioManager aud_manager;
     private AudioSource aud;
 
     public int X_limit = 9;
@@ -48,7 +47,6 @@ public class mapDash : MonoBehaviour
 
     void Awake()
     {
-        aud_manager = new audioManager();
         mapSquareCollection = new List<List<GameObject>>();
 
         db = GetComponent<MapDatabase>();
@@ -68,9 +66,9 @@ public class mapDash : MonoBehaviour
 
     void Update()
     {
-        if (mapPanelEnabled && !stateControl)
+        if (mapPanelEnabled && !stateControl && !FsmVariables.GlobalVariables.GetFsmBool("isSystemLock").Value)
         {
-            aud.clip = Resources.Load<AudioClip>(aud_manager.electrical);
+            aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
             aud.Play();
             stateControl = true;//for the first time loading
             selectCurrentMap();//(-1, -1);
@@ -86,11 +84,11 @@ public class mapDash : MonoBehaviour
             {
                 if (currentSelectedY == Y_limit)
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                 }
                 else//select next item
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     currentSelectedY++;
                     selectCurrentMap();//(0, -1);
                 }
@@ -106,7 +104,7 @@ public class mapDash : MonoBehaviour
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     aud.Play();
                     currentSelectedY--;
                     selectCurrentMap();//(0, +1);
@@ -117,11 +115,11 @@ public class mapDash : MonoBehaviour
             {
                 if (currentSelectedX == X_limit)
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     currentSelectedX++;
                     selectCurrentMap();//(-1, 0);
                 }
@@ -133,11 +131,11 @@ public class mapDash : MonoBehaviour
             {
                 if (currentSelectedX == 0)
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     currentSelectedX--;
                     selectCurrentMap();//(1, 0);
                 }
@@ -233,7 +231,7 @@ public class mapDash : MonoBehaviour
     public void closePanel()
     {
         panelSelectedMapInformationDisplay.GetComponent<CanvasGroup>().alpha = 0;
-        aud.clip = Resources.Load<AudioClip>(aud_manager.electricalExit);
+        aud.clip = Resources.Load<AudioClip>(audioManager.electricalExit);
         aud.Play();
         resetVariables();
         GetComponent<menuManager>().tabSwitch = true; //make the top tab goes back to previous state...

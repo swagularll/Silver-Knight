@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using HutongGames.PlayMaker;
 using Assets.Script.ODM_Widget;
+using LitJson;
 
 public class itemSetting : MonoBehaviour
 {
@@ -16,6 +17,9 @@ public class itemSetting : MonoBehaviour
     public string linked_fsm = "FSM";
     public string special_collect_msg = "";//show special message when picking up an item
 
+    public itemInfo item_info;
+
+
     private string default_collect_msg = "showGetItem";//picked up [item]
     private eventCenter event_center;
     private dialogPanel dialogue_panel;
@@ -26,10 +30,17 @@ public class itemSetting : MonoBehaviour
 
     private void Awake()
     {
-        catalog_code = inventoryDash.inventoryItem.none;
+        item_info = new itemInfo();
+
+        item_info.item_guid = (new Guid()).ToString();
+        item_info.catalog_code = catalog_code;
+        item_info.located_level = Application.loadedLevelName;
+        item_info.location_x = this.transform.position.x;
+        item_info.location_y = this.transform.position.y;
+        item_info.location_z = this.transform.position.z;
     }
 
-    private void tryPickUpItem()//Add item, set event callback reference
+    private void collectItem()//Add item, set event callback reference
     {
         if (is_document)
         {
@@ -58,6 +69,11 @@ public class itemSetting : MonoBehaviour
         }
     }
 
+    public void setItemCollected()
+    {
+        ODMObject.event_manager.GetComponent<itemManager>().removeItemRegistration(this.item_info.item_guid);
+    }
+
     //Will only be called when object generates
     public void initilaization()
     {
@@ -79,4 +95,33 @@ public class itemSetting : MonoBehaviour
 
         fsm.SendEvent("script ready");
     }
+
+    public class itemInfo
+    {
+        public string item_guid { get; set; }
+        public inventoryDash.inventoryItem catalog_code { get; set; }
+        public string located_level { get; set; }
+        public float location_x { get; set; }
+        public float location_y { get; set; }
+        public float location_z { get; set; }
+
+        public itemInfo()
+        {
+        }
+
+        public itemInfo(string _json)
+        {
+            itemInfo item_info = JsonMapper.ToObject<itemInfo>(_json);
+            this.catalog_code = item_info.catalog_code;
+            this.location_x = item_info.location_x;
+            this.location_y = item_info.location_y;
+            this.location_z = item_info.location_z;
+        }
+        public string getJsonString()
+        {
+            JsonData dataJson = JsonMapper.ToJson(this);
+            return dataJson.ToString();
+        }
+    }
+
 }

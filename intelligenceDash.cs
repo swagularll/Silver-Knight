@@ -29,7 +29,6 @@ public class intelligenceDash : MonoBehaviour
     private List<GameObject> buttonCollection;
     private List<GameObject> txtintelligenceTagCollection;
 
-    private audioManager aud_manager;
     private AudioSource aud;
 
     private bool stateControl = false;
@@ -57,8 +56,6 @@ public class intelligenceDash : MonoBehaviour
         intelligenceCollection = new List<CIntelligence>();
         buttonCollection = new List<GameObject>();
         txtintelligenceTagCollection = new List<GameObject>();
-        aud_manager = new audioManager();
-
 
         string intelligencePath = @"Data Collection\" + PlayerPrefs.GetString("lang") + @"\Intelligence";
         txtSource = Resources.Load<TextAsset>(intelligencePath);
@@ -89,7 +86,7 @@ public class intelligenceDash : MonoBehaviour
             {
                 if (getSlotIndex() == slotCount - 1)//last intelligence cannot go down
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                     aud.Play();
                 }
                 else
@@ -98,7 +95,7 @@ public class intelligenceDash : MonoBehaviour
                     if (isReadingintelligence)
                         stopManagement();
                     nextIntelligence();
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     aud.Play();
                 }
             }
@@ -115,7 +112,7 @@ public class intelligenceDash : MonoBehaviour
                     if (isReadingintelligence)
                         stopManagement();
                     previousintelligence();
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     aud.Play();
                 }
             }
@@ -127,12 +124,12 @@ public class intelligenceDash : MonoBehaviour
                     if (currentListPage < maxListPage)
                     {
                         nextListPage();
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                         aud.Play();
                     }
                     else//Last list
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                         aud.Play();
                     }
                 }
@@ -142,12 +139,12 @@ public class intelligenceDash : MonoBehaviour
                     {
                         currentintelligencePage++;
                         switchintelligencePage();
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.pageTurn);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.pageTurn);
                         aud.Play();
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.negativeSmall);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
                         aud.Play();
                     }
                 }
@@ -161,11 +158,11 @@ public class intelligenceDash : MonoBehaviour
                     if (currentListPage != 1)
                     {
                         previousListPage();
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                     }
                     aud.Play();
                 }
@@ -175,12 +172,12 @@ public class intelligenceDash : MonoBehaviour
                     {
                         currentintelligencePage--;
                         switchintelligencePage();
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.pageTurn);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.pageTurn);
                         aud.Play();
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.negativeSmall);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
                         aud.Play();
                     }
                 }
@@ -194,7 +191,7 @@ public class intelligenceDash : MonoBehaviour
                 {
                     if (!isReadingintelligence)
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.electrical);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
                         aud.Play();
                         startManagement();
                         showIntelligence();
@@ -202,13 +199,13 @@ public class intelligenceDash : MonoBehaviour
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.negativeSmall);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
                         aud.Play();
                     }
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.negativeSmall);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
                     aud.Play();
                 }
             }
@@ -218,7 +215,7 @@ public class intelligenceDash : MonoBehaviour
                 if (isReadingintelligence)
                 {
                     stopManagement();
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.electricalExit);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.electricalExit);
                     aud.Play();
                 }
                 else
@@ -485,7 +482,7 @@ public class intelligenceDash : MonoBehaviour
 
     public void openPanel()
     {
-        aud.clip = Resources.Load<AudioClip>(aud_manager.electrical);
+        aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
         aud.Play();
         intelligenceSelectSwitch = true;
         preSetting();
@@ -493,7 +490,7 @@ public class intelligenceDash : MonoBehaviour
 
     public void closePanel()
     {
-        aud.clip = Resources.Load<AudioClip>(aud_manager.electricalExit);
+        aud.clip = Resources.Load<AudioClip>(audioManager.electricalExit);
         aud.Play();
         GetComponent<menuManager>().tabSwitch = true;
         intelligenceSelectSwitch = false;

@@ -14,23 +14,22 @@ public class saveList : MonoBehaviour
 
     public GameObject saveButton;
     public GameObject buttonContainer;
-    public GameObject SaveLoadContainer;
+    //public GameObject SaveLoadContainer;
     public GameObject pageText;
 
     public GameObject rightArror;
     public GameObject leftArror;
-    private Animator ani;
-    private audioManager s = new audioManager();
-    private AudioSource aud;
 
     public int buttonNumber = 10;
 
+    private Animator ani;
+    private AudioSource aud;
     private List<GameObject> listButton = new List<GameObject>();
+    private List<ODM.ODMDictionary> listSave = new List<ODM.ODMDictionary>();
     private int currentPage = 0;
     private int mainIndex = 0; //full scale
     private int buttonIndex = 0; //per page
     private int maxPage = 0;
-    private List<ODM.ODMDictionary> listSave = new List<ODM.ODMDictionary>();
 
     void Awake()
     {
@@ -84,7 +83,7 @@ public class saveList : MonoBehaviour
             listButton[getIndex()].GetComponent<saveButton>().isSelected = true;
         }
         renewPage();
-        fsmHelper.getFsm(SaveLoadContainer, "FSM").SendEvent("show data");
+        fsmHelper.getFsm(transform.gameObject, "FSM").SendEvent("show data");
     }
     public void renewPage()
     {
@@ -109,7 +108,7 @@ public class saveList : MonoBehaviour
 
     private void showNoRecord()
     {
-        fsmHelper.getFsm(SaveLoadContainer, "FSM").SendEvent("no data");
+        fsmHelper.getFsm(transform.gameObject, "FSM").SendEvent("no data");
     }
 
     public void nextPage()
@@ -125,12 +124,12 @@ public class saveList : MonoBehaviour
                 mainIndex += buttonNumber;
             renewPage();
             listButton[getIndex()].GetComponent<saveButton>().isSelected = true;
-            aud.clip = Resources.Load<AudioClip>(s.pageTurn);
+            aud.clip = Resources.Load<AudioClip>(audioManager.pageTurn);
             aud.Play();
         }
         else
         {
-            aud.clip = Resources.Load<AudioClip>(s.selectionNegative);
+            aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
             aud.Play();
         }
     }
@@ -142,7 +141,7 @@ public class saveList : MonoBehaviour
         mainIndex++;
         renewPage();
         listButton[getIndex()].GetComponent<saveButton>().isSelected = true;
-        aud.clip = Resources.Load<AudioClip>(s.pageTurn);
+        aud.clip = Resources.Load<AudioClip>(audioManager.pageTurn);
         aud.Play();
     }
     private void previousPage()
@@ -154,12 +153,12 @@ public class saveList : MonoBehaviour
             mainIndex -= buttonNumber;
             renewPage();
             listButton[getIndex()].GetComponent<saveButton>().isSelected = true;
-            aud.clip = Resources.Load<AudioClip>(s.pageTurn);
+            aud.clip = Resources.Load<AudioClip>(audioManager.pageTurn);
             aud.Play();
         }
         else
         {
-            aud.clip = Resources.Load<AudioClip>(s.selectionNegative);
+            aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
             aud.Play();
         }
     }
@@ -170,7 +169,7 @@ public class saveList : MonoBehaviour
         mainIndex--;
         renewPage();
         listButton[getIndex()].GetComponent<saveButton>().isSelected = true;
-        aud.clip = Resources.Load<AudioClip>(s.pageTurn);
+        aud.clip = Resources.Load<AudioClip>(audioManager.pageTurn);
         aud.Play();
     }
     public void nextButton()
@@ -186,18 +185,18 @@ public class saveList : MonoBehaviour
                 listButton[getIndex()].GetComponent<saveButton>().isSelected = false;
                 mainIndex++;
                 listButton[getIndex()].GetComponent<saveButton>().isSelected = true;
-                aud.clip = Resources.Load<AudioClip>(s.selectionSwitch);
+                aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                 aud.Play();
             }
             else
             {
-                aud.clip = Resources.Load<AudioClip>(s.selectionNegative);
+                aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                 aud.Play();
             }
         }
         else
         {
-            aud.clip = Resources.Load<AudioClip>(s.selectionNegative);
+            aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
             aud.Play();
         }
     }
@@ -214,12 +213,12 @@ public class saveList : MonoBehaviour
                 listButton[getIndex()].GetComponent<saveButton>().isSelected = false;
                 mainIndex--;
                 listButton[getIndex()].GetComponent<saveButton>().isSelected = true;
-                aud.clip = Resources.Load<AudioClip>(s.selectionSwitch);
+                aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                 aud.Play();
             }
             else
             {
-                aud.clip = Resources.Load<AudioClip>(s.selectionNegative);
+                aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                 aud.Play();
             }
         }

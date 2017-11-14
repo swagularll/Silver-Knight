@@ -20,12 +20,10 @@ public class menuManager : MonoBehaviour
     private List<Image> buttonCollection;
     private int buttonIndex = 0;
     private AudioSource aud;
-    private audioManager aud_manager;
 
     void Start()
     {
         buttonCollection = new List<Image>();
-        aud_manager = new audioManager();
 
         buttonCollection.Add(GameObject.Find("Button Inventory").GetComponent<Image>());
         buttonCollection.Add(GameObject.Find("Button Map").GetComponent<Image>());
@@ -37,19 +35,19 @@ public class menuManager : MonoBehaviour
     }
     void Update()
     {
-        if (tabSwitch && isOpen) // switching between menu
+        if (tabSwitch && isOpen && !FsmVariables.GlobalVariables.GetFsmBool("isSystemLock").Value) // switching between menu
         {
             if (Input.GetKeyDown(KeyCode.RightArrow) && buttonIndex < buttonCollection.Count - 1)
             {
                 setTab(buttonCollection[++buttonIndex]);
-                aud.clip = Resources.Load<AudioClip>(aud_manager.typer);
+                aud.clip = Resources.Load<AudioClip>(audioManager.typer);
                 aud.Play();
 
             }
             if (Input.GetKeyDown(KeyCode.LeftArrow) && buttonIndex > 0)
             {
                 setTab(buttonCollection[--buttonIndex]);
-                aud.clip = Resources.Load<AudioClip>(aud_manager.typer);
+                aud.clip = Resources.Load<AudioClip>(audioManager.typer);
                 aud.Play();
             }
             if (Input.GetKeyDown(KeyCode.DownArrow))//enable middle
@@ -152,7 +150,7 @@ public class menuManager : MonoBehaviour
         buttonIndex = 0;
         setTab(buttonCollection[buttonIndex]);
 
-        aud.clip = Resources.Load<AudioClip>(aud_manager.electrical);
+        aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
         aud.Play();
         topCanvas.isOpen = leftCanvas.isOpen = rightCanvas.isOpen = background.isOpen = true;
         setTab(currentButton);
@@ -165,7 +163,7 @@ public class menuManager : MonoBehaviour
 
     public void closeMenu()
     {
-        aud.clip = Resources.Load<AudioClip>(aud_manager.electrical);
+        aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
         aud.Play();
         switch (currentButton.name)
         {

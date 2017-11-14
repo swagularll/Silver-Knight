@@ -16,7 +16,7 @@ public class warmbugLair : MonoBehaviour
     private bool resetRequest;
 
     public List<GameObject> lair_entity_collection;
-    public List<GameObject> living_bug_entity_colleciton;
+    public List<GameObject> living_bug_entity_colleciton = new List<GameObject>();
 
 
     private List<lairInfo> level_lair_info_collection;// for save record
@@ -28,15 +28,22 @@ public class warmbugLair : MonoBehaviour
     public string reset_flag;
     public string lair_approval_flag;
 
-    void Awake()
+    private void Awake()
     {
-        warmbug_lair_manager = ODMObject.event_manager.GetComponent<warmbugLairManager>();
-        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
         level_lair_info_collection = new List<lairInfo>();
-
         level_name = Application.loadedLevelName;
         reset_flag = level_name + " Warmbug Reset";
         lair_approval_flag = level_name + " Warmbug";
+    }
+    private void InitialzeScript()
+    {
+        warmbug_lair_manager = ODMObject.event_manager.GetComponent<warmbugLairManager>();
+        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
+    }
+
+    private void Start()
+    {
+        InitialzeScript();
 
         isApproved = event_center.getFlagBool(lair_approval_flag);
         resetRequest = event_center.getFlagBool(reset_flag);
@@ -112,7 +119,6 @@ public class warmbugLair : MonoBehaviour
     }
     public void setDead(string _warmbugID)
     {
-        var result = level_lair_info_collection.Where(x => x.warmbug_guid.Equals(_warmbugID));
         level_lair_info_collection.RemoveAll(x => x.warmbug_guid.Equals(_warmbugID));
         updateBugDistribution();
     }

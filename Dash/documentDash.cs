@@ -57,13 +57,11 @@ public class documentDash : MonoBehaviour
     private Color32 CUnselectedColor = new Color32(45, 45, 45, 150);
     private Color32 CBlack = new Color32(0, 0, 0, 255);
 
-    private audioManager aud_manager;
     void Start()
     {
         documentCollection = new List<CDocument>();
         buttonCollection = new List<GameObject>();
         txtDocumentTagCollection = new List<GameObject>();
-        aud_manager = new audioManager();
 
         string documentPath = @"Data Collection\" + PlayerPrefs.GetString("lang") + @"\Document";
         txtSource = Resources.Load<TextAsset>(documentPath);
@@ -87,13 +85,13 @@ public class documentDash : MonoBehaviour
             stateControl = true;//for the first time loading
             nextDocument();
         }
-        else if (documentSelectSwitch && stateControl)//Document Select section
+        else if (documentSelectSwitch && stateControl && !FsmVariables.GlobalVariables.GetFsmBool("isSystemLock").Value)//Document Select section
         {
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
                 if (getSlotIndex() == slotCount - 1)//last document cannot go down
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                     aud.Play();
                 }
                 else
@@ -102,7 +100,7 @@ public class documentDash : MonoBehaviour
                     if (isReadingDocument)
                         stopManagement();
                     nextDocument();
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     aud.Play();
                 }
             }
@@ -119,7 +117,7 @@ public class documentDash : MonoBehaviour
                     if (isReadingDocument)
                         stopManagement();
                     previousDocument();
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     aud.Play();
                 }
             }
@@ -131,12 +129,12 @@ public class documentDash : MonoBehaviour
                     if (currentListPage < maxListPage)//List
                     {
                         nextListPage();
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                         aud.Play();
                     }
                     else//Last list
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                         aud.Play();
                     }
                 }
@@ -146,12 +144,12 @@ public class documentDash : MonoBehaviour
                     {
                         currentDocumentPage++;
                         switchDocumentPage();
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.pageTurn);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.pageTurn);
                         aud.Play();
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.negativeSmall);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
                         aud.Play();
                     }
                 }
@@ -165,11 +163,11 @@ public class documentDash : MonoBehaviour
                     if (currentListPage != 1)//List
                     {
                         previousListPage();
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.selectionSwitch);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.selectionNegative);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
                     }
                     aud.Play();
                 }
@@ -179,12 +177,12 @@ public class documentDash : MonoBehaviour
                     {
                         currentDocumentPage--;
                         switchDocumentPage();
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.pageTurn);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.pageTurn);
                         aud.Play();
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.negativeSmall);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
                         aud.Play();
                     }
                 }
@@ -198,7 +196,7 @@ public class documentDash : MonoBehaviour
                 {
                     if (!isReadingDocument)
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.electrical);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
                         aud.Play();
                         startManagement();
                         showDocument();
@@ -206,13 +204,13 @@ public class documentDash : MonoBehaviour
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(aud_manager.negativeSmall);
+                        aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
                         aud.Play();
                     }
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.negativeSmall);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
                     aud.Play();
                 }
             }
@@ -222,7 +220,7 @@ public class documentDash : MonoBehaviour
                 if (isReadingDocument)
                 {
                     stopManagement();
-                    aud.clip = Resources.Load<AudioClip>(aud_manager.electricalExit);
+                    aud.clip = Resources.Load<AudioClip>(audioManager.electricalExit);
                     aud.Play();
                 }
                 else
@@ -475,14 +473,14 @@ public class documentDash : MonoBehaviour
 
     public void openPanel()
     {
-        aud.clip = Resources.Load<AudioClip>(aud_manager.electrical);
+        aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
         aud.Play();
         documentSelectSwitch = true;
         preSetting();
     }
     public void closePanel()
     {
-        aud.clip = Resources.Load<AudioClip>(aud_manager.electricalExit);
+        aud.clip = Resources.Load<AudioClip>(audioManager.electricalExit);
         aud.Play();
         GetComponent<menuManager>().tabSwitch = true;
         documentSelectSwitch = false;
