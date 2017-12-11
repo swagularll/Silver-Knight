@@ -6,11 +6,10 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using LitJson;
-using Assets.Script.ODM_Widget;
+
 
 public class saveLoader : MonoBehaviour
 {
-    private TextAsset flag_collection_asset;
     public bool development_load = false;
     public List<int[]> inventory_collection = new List<int[]>();
 
@@ -18,57 +17,57 @@ public class saveLoader : MonoBehaviour
     {
         try
         {
-            if (!FsmVariables.GlobalVariables.GetFsmBool("create_new_save").Value)
+            if (!ODMVariable.create_new_save)
             {
                 //Load game from save record
                 saveRecord save_record = saveRecord.getCurrentRecord();
 
-                PlayerPrefs.SetString("level_to_load", save_record.save_data.getValue("saved_scene"));
-                PlayerPrefs.SetString("game_difficulty", save_record.save_data.getValue("game_difficulty"));
-                FsmVariables.GlobalVariables.GetFsmFloat("move_speed").Value = float.Parse(save_record.save_data.getValue("move_speed"));
+                ODMVariable.level_to_load = save_record.save_data.getValue(ODMVariable.save.saved_scene);
+                ODMVariable.game_difficulty = Int32.Parse(save_record.save_data.getValue(ODMVariable.save.game_difficulty));
+                ODMVariable.ava_move_speed = float.Parse(save_record.save_data.getValue(ODMVariable.save.move_speed));
 
-                FsmVariables.GlobalVariables.GetFsmBool("status_armor").Value = Convert.ToBoolean(save_record.save_data.getValue("status_armor"));
-                FsmVariables.GlobalVariables.GetFsmBool("status_cum").Value = Convert.ToBoolean(save_record.save_data.getValue("status_cum"));
-                FsmVariables.GlobalVariables.GetFsmBool("status_protected").Value = Convert.ToBoolean(save_record.save_data.getValue("status_protected"));
-                FsmVariables.GlobalVariables.GetFsmBool("status_serum").Value = Convert.ToBoolean(save_record.save_data.getValue("status_serum"));
+                ODMVariable.status_armor = Convert.ToBoolean(save_record.save_data.getValue(ODMVariable.save.status_armor));
+                ODMVariable.status_cum = Convert.ToBoolean(save_record.save_data.getValue(ODMVariable.save.status_cum));
+                ODMVariable.status_protected = Convert.ToBoolean(save_record.save_data.getValue(ODMVariable.save.status_protected));
+                ODMVariable.status_serum = Convert.ToBoolean(save_record.save_data.getValue(ODMVariable.save.status_serum));
 
-                FsmVariables.GlobalVariables.GetFsmFloat("ava_current_health").Value = float.Parse(save_record.save_data.getValue("ava_current_health"));
-                FsmVariables.GlobalVariables.GetFsmFloat("ava_current_sp").Value = float.Parse(save_record.save_data.getValue("ava_current_sp"));
-                FsmVariables.GlobalVariables.GetFsmFloat("ava_current_poison").Value = float.Parse(save_record.save_data.getValue("ava_current_poison"));
+                ODMVariable.ava_current_health = float.Parse(save_record.save_data.getValue(ODMVariable.save.ava_current_health));
+                ODMVariable.ava_current_sp = float.Parse(save_record.save_data.getValue(ODMVariable.save.ava_current_sp));
+                ODMVariable.ava_current_poison = float.Parse(save_record.save_data.getValue(ODMVariable.save.ava_current_poison));
 
-                float ava_current_position = float.Parse(save_record.save_data.getValue("ava_current_position"));
-                GameObject Ava = ODMObject.character_ava;
+                float ava_current_position = float.Parse(save_record.save_data.getValue(ODMVariable.save.ava_current_position));
                 if (!development_load)
                 {
-                    Vector3 ava_location = new Vector3(ava_current_position, Ava.transform.position.y, Ava.transform.position.z);
-                    Ava.transform.position = ava_location;
+                    Vector3 ava_location = new Vector3(ava_current_position, ODMObject.character_ava.transform.position.y, ODMObject.character_ava.transform.position.z);
+                    ODMObject.character_ava.transform.position = ava_location;
                 }
-                FsmVariables.GlobalVariables.GetFsmInt("current_bullets").Value = Int32.Parse(save_record.save_data.getValue("current_bullets"));
-                inventory_collection = JsonMapper.ToObject<List<int[]>>(save_record.save_data.getValue("inventory_collection"));//inventory Dash will access this list
+                ODMVariable.current_bullet = Int32.Parse(save_record.save_data.getValue(ODMVariable.save.current_bullets));
+                inventory_collection = JsonMapper.ToObject<List<int[]>>(save_record.save_data.getValue(ODMVariable.save.inventory_collection));//inventory Dash will access this list
             }
 
             //set this to true when the armor recovered
-            fsmHelper.getFsm(ODMObject.character_ava, "Player Control Disabled").
-                FsmVariables.GetFsmBool("is_hurt_start").Value = false;
+            ODMVariable.fsm.player_control_disabled.
+                FsmVariables.GetFsmBool(ODMVariable.local.is_hurt_start).Value = false;
 
-            if (FsmVariables.GlobalVariables.GetFsmBool("status_armor").Value)
+            if (ODMVariable.status_armor)
             {
-                fsmHelper.getFsm(ODMObject.character_ava, "Player Control").enabled = true;
-                fsmHelper.getFsm(ODMObject.character_ava, "Player Control Disabled").enabled = false;
+                ODMVariable.fsm.player_control.enabled = true;
+                ODMVariable.fsm.player_control_disabled.enabled = false;
             }
             else
             {
-                fsmHelper.getFsm(ODMObject.character_ava, "Player Control").enabled = false;
-                fsmHelper.getFsm(ODMObject.character_ava, "Player Control Disabled").enabled = true;
+                ODMVariable.fsm.player_control.enabled = false;
+                ODMVariable.fsm.player_control_disabled.enabled = true;
             }
             if (!development_load)
-                Application.LoadLevel(PlayerPrefs.GetString("level_to_load"));
+            {
+                Application.LoadLevel(ODMVariable.level_to_load);
+            }
+            ODMObject.event_manager.GetComponent<diarySystem>().startCounting();
         }
         catch (Exception ex)
         {
-            ODM.errorLog(transform.name, "Error occurred when initilizing the save record.", ex.ToString());
+            ODM.errorLog(transform.name, ex.ToString());
         }
     }
-
-
 }

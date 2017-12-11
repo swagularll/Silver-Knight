@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using HutongGames.PlayMaker;
-using Assets.Script.ODM_Widget;
+
 
 public class eventCenter : MonoBehaviour
 {
@@ -14,39 +14,32 @@ public class eventCenter : MonoBehaviour
     public ODM.ODMDictionary flag_collection;
 
     private PlayMakerFSM fsm;
-    private fsmHelper fsmHelper;
-
-    void Awake()
-    {
-        fsmHelper = new fsmHelper();
-    }
 
     void Start()
     {
         flag_collection = saveRecord.getCurrentRecord().flag_collection;
     }
+
     #region Flag functions
     public void checkFlag(string _flagString)
     {
         flagData flag = new flagData(_flagString);
         try
         {
-            PlayMakerFSM f = fsmHelper.getFsm(flag.ObjName, flag.FsmName);
-            bool flagValue = getFlagBool(flag.FlagName);
+            PlayMakerFSM f = fsmHelper.getFsm(flag.obj_name, flag.fsm_name);
+            bool flagValue = getFlagBool(flag.flag_name);
             if (flagValue)
             {
-                f.SendEvent("true result");
+                f.SendEvent(eventName.true_result);
             }
             else
             {
-                f.SendEvent("false result");
+                f.SendEvent(eventName.false_result);
             }
         }
         catch (Exception ex)
         {
-            ODM.errorLog(transform.name,
-                "checkFlag can't Find Flag! flagName: " + _flagString + "",
-                ex.ToString());
+            ODM.errorLog(transform.name, "checkFlag can't Find Flag! flagName: " + _flagString + ", " + ex.ToString());
         }
 
     }
@@ -60,9 +53,7 @@ public class eventCenter : MonoBehaviour
         }
         catch (Exception ex)
         {
-            ODM.errorLog(transform.name,
-                "getFlagBool Error. flagName: " + _flagName,
-                ex.ToString());
+            ODM.errorLog(transform.name,"getFlagBool Error. flagName: " + _flagName + ", " + ex.ToString());
         }
         return result;
     }
@@ -70,7 +61,7 @@ public class eventCenter : MonoBehaviour
     {
         try
         {
-            string[] flagSet = _flagSet.Split(new Char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] flagSet = _flagSet.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < flagSet.Length; i++)
             {
                 flag_collection.setValue(flagSet[i].Trim(), true.ToString());
@@ -79,9 +70,7 @@ public class eventCenter : MonoBehaviour
 
         catch (Exception ex)
         {
-            ODM.errorLog(transform.name,
-                "setFlagTrue Error. flagName: " + _flagSet,
-                ex.ToString());
+            ODM.errorLog(transform.name, "setFlagTrue Error. flagName: " + _flagSet + ", " + ex.ToString());
         }
     }
     public void setFlagFalse(string _flagSet)
@@ -97,9 +86,7 @@ public class eventCenter : MonoBehaviour
 
         catch (Exception ex)
         {
-            ODM.errorLog(transform.name,
-                "setFlagTrue Error. flagName: " + _flagSet,
-                ex.ToString());
+            ODM.errorLog(transform.name, "setFlagTrue Error. flagName: " + _flagSet + ", " + ex.ToString());
         }
     }
 
@@ -111,36 +98,34 @@ public class eventCenter : MonoBehaviour
         }
         catch (Exception ex)
         {
-            ODM.errorLog(transform.name,
-                "setFlagTrue Error. flagName: " + _flag_name,
-                ex.ToString());
+            ODM.errorLog(transform.name, "setFlagTrue Error. flagName: " + _flag_name + ", " + ex.ToString());
         }
     }
     #endregion
 
     #region Warmbug Control
+    //XXX
+    //public void setLairActivate(string _lairList)
+    //{
+    //    string[] lairCollection = _lairList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-    public void setLairActivate(string _lairList)
-    {
-        string[] lairCollection = _lairList.Split(new Char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-        for (int i = 0; i < lairCollection.Length; i++)
-        {
-            for (int k = 0; k < 10; k++)
-            {
-                string levelName = lairCollection[i];
-                if (levelName.IndexOf("-") != -1)
-                {
-                    levelName = levelName.Replace("-", "");
-                    setFlagFalse(levelName + " Warmbug");
-                }
-                else
-                {
-                    setFlagTrue(levelName + " Warmbug");
-                }
-            }
-        }
-    }
+    //    for (int i = 0; i < lairCollection.Length; i++)
+    //    {
+    //        for (int k = 0; k < 10; k++)
+    //        {
+    //            string levelName = lairCollection[i];
+    //            if (levelName.IndexOf("-") != -1)
+    //            {
+    //                levelName = levelName.Replace("-", "");
+    //                setFlagFalse(ODMVariable.convert.getWarmbugFlag(levelName));
+    //            }
+    //            else
+    //            {
+    //                setFlagTrue(ODMVariable.convert.getWarmbugFlag(levelName));
+    //            }
+    //        }
+    //    }
+    //}
 
     #endregion
 
@@ -167,53 +152,53 @@ public class eventCenter : MonoBehaviour
     #region Data Class
     class flagData
     {
-        string objName;
-        string fsmName;
-        string flagName;
+        string _obj_name;
+        string _fsm_name;
+        string _flag_name;
 
         public flagData(string flagString)
         {
             string[] dataSet = flagString.Split(',');
-            this.ObjName = dataSet[0].Trim();
-            this.fsmName = dataSet[1].Trim();
-            this.flagName = dataSet[2].Trim();
+            this.obj_name = dataSet[0].Trim();
+            this._fsm_name = dataSet[1].Trim();
+            this._flag_name = dataSet[2].Trim();
         }
-        public string ObjName
+        public string obj_name
         {
             get
             {
-                return objName;
+                return _obj_name;
             }
 
             set
             {
-                objName = value;
+                _obj_name = value;
             }
         }
 
-        public string FsmName
+        public string fsm_name
         {
             get
             {
-                return fsmName;
+                return _fsm_name;
             }
 
             set
             {
-                fsmName = value;
+                _fsm_name = value;
             }
         }
 
-        public string FlagName
+        public string flag_name
         {
             get
             {
-                return flagName;
+                return _flag_name;
             }
 
             set
             {
-                flagName = value;
+                _flag_name = value;
             }
         }
 

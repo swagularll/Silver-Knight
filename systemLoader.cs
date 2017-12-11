@@ -6,7 +6,6 @@ using System.Net.NetworkInformation;
 using System.Linq;
 using LitJson;
 using System.Xml;
-using Assets.Script.ODM_Widget;
 
 public class systemLoader : MonoBehaviour
 {
@@ -20,36 +19,15 @@ public class systemLoader : MonoBehaviour
     private PlayMakerFSM fsm;
     void Awake()
     {
+        fsm = fsmHelper.getFsm(transform.name, ODMVariable.common.default_fsm);
 
-        setting_files = Application.dataPath + "/PPODM_SETTING.txt";
         //Screen.SetResolution(1024, 768, true);
-        //Game Settings that will hardly change
-
-        string save_folder_directory = Application.dataPath + @"\Save";
-        PlayerPrefs.SetString("save_folder_directory", save_folder_directory); //PlayerPrefs.SetString("save folder", saveFolderPath);
-
-        //string runtime_save_file = save_folder_directory + @"\Current.json";
-        //PlayerPrefs.SetString("runtime_save_file", runtime_save_file);
-
-        string auto_save_file = save_folder_directory + @"\Auto.json";
-        PlayerPrefs.SetString("auto_save_file", auto_save_file);
-
-        string base_flag_collection = @"Data Collection\FLAG_COLLECTION";
-        PlayerPrefs.SetString("base_flag_collection", base_flag_collection);
-
-
-        //Default settings
-        PlayerPrefs.SetString("save_code", "default");
-
-        //warmbugDeploymentFilePath = PlayerPrefs.GetString("saveSlot") + @"/" + "Lair";
-
-        if (!Directory.Exists(save_folder_directory))
-            Directory.CreateDirectory(save_folder_directory);
+        if (!Directory.Exists(ODMVariable.path.save_folder_directory))
+            Directory.CreateDirectory(ODMVariable.path.save_folder_directory);
     }
 
     void Start()
     {
-        fsm = fsmHelper.getFsm(transform.name, "FSM");
     }
 
     #region player data check
@@ -78,7 +56,7 @@ public class systemLoader : MonoBehaviour
             }
             catch (Exception ex)
             {
-                ODM.errorLog(transform.name, "Fail to load key.", ex.ToString());
+                ODM.errorLog(transform.name, "Fail to load key. " + ex.ToString());
             }
         }
         else
@@ -190,9 +168,7 @@ public class systemLoader : MonoBehaviour
         else
         {
             callback(null);
-            ODM.errorLog(transform.name,
-                "request_checkMac Error.",
-                requestMacUpload.error);
+            ODM.errorLog(transform.name, "request_checkMac Error: " +  requestMacUpload.error);
         }
     }
 
@@ -219,9 +195,7 @@ public class systemLoader : MonoBehaviour
         }
         else
         {
-            ODM.errorLog(transform.name,
-                "WWW Error.",
-                www.error);
+            ODM.errorLog(transform.name, "WWW Error: " + www.error);
         }
     }
     #endregion
@@ -240,9 +214,7 @@ public class systemLoader : MonoBehaviour
         }
         catch (Exception ex)
         {
-            ODM.errorLog(transform.name,
-                "Fail to identify user mac.",
-                ex.ToString());
+            ODM.errorLog(transform.name, "Fail to identify user mac: "+ ex.ToString());
         }
 
         return result;
@@ -263,18 +235,18 @@ public class systemLoader : MonoBehaviour
             }
             else
             {
-                fsm.SendEvent("next");
+                fsm.SendEvent(eventName.next);
             }
         }
         else
         {
-            fsm.SendEvent("next");
+            fsm.SendEvent(eventName.next);
         }
     }
 
     #endregion
 
-    #region data class
+    #region Local Data Class
     class CMacPack
     {
         public string connectionCode { get; set; }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using HutongGames.PlayMaker;
-using Assets.Script.ODM_Widget;
+
 using System.Collections.Generic;
 
 public class levelLoader : MonoBehaviour
@@ -23,26 +23,25 @@ public class levelLoader : MonoBehaviour
         aud.clip = sound_door_open;
 
         //BGM setting
-        PlayMakerFSM fsmBGM = fsmHelper.getFsm("BGM Manager", "FSM");
-        if (!fsmBGM.FsmVariables.GetFsmBool("isDefault").Value)
-            fsmBGM.SendEvent("set default bgm");
+        if (!ODMVariable.fsm.bgm_manager.FsmVariables.GetFsmBool(ODMVariable.local.is_default).Value)
+            ODMVariable.fsm.bgm_manager.SendEvent(eventName.set_default_bgm);
 
         //Things need to do when player first time enter the game.
-        if (fsmHelper.getFsm(ODMObject.event_manager, ODMVariable.fsm_scene_controller).
-            FsmVariables.GetFsmBool("isFirstLoad").Value)
+        if (ODMVariable.fsm.scene_controller.FsmVariables.GetFsmBool(ODMVariable.local.is_first_load).Value)
         {
-            fsmHelper.getFsm(ODMObject.event_manager, ODMVariable.fsm_scene_controller).FsmVariables.GetFsmBool("isFirstLoad").Value = false;
+            //Load from initialization scene
+            ODMVariable.fsm.scene_controller.FsmVariables.GetFsmBool(ODMVariable.local.is_first_load).Value = false;
         }
         else
         {
-            setPlayerPosition();
+            setPlayerPosition();//Set player position by map
             event_center.GetComponent<actionControl>().setIdle();
         }
     }
 
     public void setPlayerPosition()
     {
-        string intro_location = FsmVariables.GlobalVariables.GetFsmString("fromDoor").Value;
+        string intro_location = ODMVariable.world.from_door;
         var ava_transform = ODMObject.character_ava.transform.GetComponent<Transform>();
         float door_x = 0f;
         switch (intro_location)
@@ -70,7 +69,7 @@ public class levelLoader : MonoBehaviour
                 door_x = GameObject.Find("Map Left Door").GetComponent<Transform>().position.x + 3;
                 break;
         }
-        ava_transform.position = new Vector3(door_x, 0, 0);
+        ava_transform.position = new Vector3(door_x, -0.3f, 0);
     }
 
 }

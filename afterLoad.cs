@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using HutongGames.PlayMaker;
-using Assets.Script.ODM_Widget;
+
 using System.Collections.Generic;
+using System;
 
 public class afterLoad : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class afterLoad : MonoBehaviour
 
     //For scene drag
     public GameObject obj_warmbug_lair;
-    
+
 
     private warmbugLair level_warmbug_lair;
     private eventCenter event_center;
@@ -19,6 +20,8 @@ public class afterLoad : MonoBehaviour
 
     private string map_display_text;
     private string stage_flag_name;
+
+    private string fsm_fade = "Fade";
 
     private void InitialzeScript()
     {
@@ -28,7 +31,7 @@ public class afterLoad : MonoBehaviour
 
         CMap currentMap = ODMObject.event_manager.GetComponent<MapDatabase>().getMap(Application.loadedLevelName);
         map_display_text = currentMap.name + " " + currentMap.title;
-        stage_flag_name = "Area " + Application.loadedLevelName;
+        stage_flag_name = ODMVariable.convert.getAreaFlag(Application.loadedLevelName);
     }
 
     void Start()
@@ -46,15 +49,19 @@ public class afterLoad : MonoBehaviour
             level_warmbug_lair.registerLevelLair();
             this.registerAllLevelItems();
         }
+        else
+        {
+            this.removeAllLevelItems();
+            item_manager.deployLevelItems(Application.loadedLevelName);
+        }
 
         //check if there is any event running
         if (!checkEventOccupation()) //Release Warmbugs
         {
             level_warmbug_lair.releaseWarmbugs();
         }
-        setItemReady();
 
-        fsmHelper.getFsm(ODMObject.event_manager, "Fade").SendEvent("fade in");
+        fsmHelper.getFsm(ODMObject.event_manager, fsm_fade).SendEvent(eventName.fade_in);
         //fsmHelper.getFsm(transform.gameObject, "FSM").SendEvent("broadcast ready");//do some modification on this shit
     }
 
@@ -72,17 +79,19 @@ public class afterLoad : MonoBehaviour
 
     private void registerAllLevelItems()
     {
+        //Register item with new GUID
         for (int i = 0; i < item_entity_collection.Count; i++)
         {
             item_manager.registerItem(item_entity_collection[i]);
+            item_entity_collection[i].GetComponent<itemSetting>().initilaization();
         }
     }
 
-    private void setItemReady()
+    private void removeAllLevelItems()
     {
         for (int i = 0; i < item_entity_collection.Count; i++)
         {
-            item_entity_collection[i].GetComponent<itemSetting>().initilaization();
+            GameObject.Destroy(item_entity_collection[i]);
         }
     }
 }

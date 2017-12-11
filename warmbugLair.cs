@@ -7,11 +7,11 @@ using System.Text;
 using LitJson;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Script.ODM_Widget;
+
 
 public class warmbugLair : MonoBehaviour
 {
-    public bool isActivate;
+    public bool isActivate;//For testing
     private bool isApproved;
     private bool resetRequest;
 
@@ -32,15 +32,9 @@ public class warmbugLair : MonoBehaviour
     {
         level_lair_info_collection = new List<lairInfo>();
         level_name = Application.loadedLevelName;
-        reset_flag = level_name + " Warmbug Reset";
-        lair_approval_flag = level_name + " Warmbug";
+        reset_flag = ODMVariable.convert.getWarmbugResetFlag(level_name);
+        lair_approval_flag = ODMVariable.convert.getWarmbugFlag(level_name);
     }
-    private void InitialzeScript()
-    {
-        warmbug_lair_manager = ODMObject.event_manager.GetComponent<warmbugLairManager>();
-        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
-    }
-
     private void Start()
     {
         InitialzeScript();
@@ -49,6 +43,11 @@ public class warmbugLair : MonoBehaviour
         resetRequest = event_center.getFlagBool(reset_flag);
     }
 
+    private void InitialzeScript()
+    {
+        warmbug_lair_manager = ODMObject.event_manager.GetComponent<warmbugLairManager>();
+        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
+    }
 
     private void generateLairInfo()
     {
@@ -58,23 +57,33 @@ public class warmbugLair : MonoBehaviour
             //Get Warmbug from catalogue
             int bug_rand_index = (int)UnityEngine.Random.Range(0, 100.0f) % warmbug_lair_manager.getBugCatelogCount();
             GameObject lair_born_bug = warmbug_lair_manager.getCatelogBugEntity(bug_rand_index);
-
-            createToLairCollection(lair_born_bug);
+            createBugFromLairInfo(lair_born_bug, lair_entity_collection[i]);
         }
 
         //For living bugs
         for (int i = 0; i < living_bug_entity_colleciton.Count; i++)
         {
-            createToLairCollection(living_bug_entity_colleciton[i]);
+            createBugFromLivingBug(living_bug_entity_colleciton[i]);
         }
     }
 
-    public void createToLairCollection(GameObject _lair_born_bug)
+    public void createBugFromLairInfo(GameObject _lair_born_bug, GameObject _lair_location)
     {
         lairInfo lair_info = new lairInfo();
         _lair_born_bug.GetComponent<warmbugAction>().initilization(this, lair_info, false);
         lair_info.bug_name = _lair_born_bug.GetComponent<warmbugAction>().getName();
-        lair_info.location_x = _lair_born_bug.transform.position.x;
+        lair_info.location_x = _lair_location.transform.position.x;
+        //collection x value
+        //bug.transform.position = bug_position;//record WB location for reput
+        level_lair_info_collection.Add(lair_info);
+    }
+
+    public void createBugFromLivingBug(GameObject _living_bug)
+    {
+        lairInfo lair_info = new lairInfo();
+        _living_bug.GetComponent<warmbugAction>().initilization(this, lair_info, false);
+        lair_info.bug_name = _living_bug.GetComponent<warmbugAction>().getName();
+        lair_info.location_x = _living_bug.transform.position.x;
         //collection x value
         //bug.transform.position = bug_position;//record WB location for reput
         level_lair_info_collection.Add(lair_info);
@@ -108,7 +117,7 @@ public class warmbugLair : MonoBehaviour
     }
     private void putBug(lairInfo _lair_info)
     {
-        GameObject catelog_bug = Instantiate(warmbug_lair_manager.getCatelogBugEntity(_lair_info.bug_name));
+        GameObject catelog_bug = warmbug_lair_manager.getCatelogBugEntity(_lair_info.bug_name);
         Vector3 bug_position = new Vector3((float)_lair_info.location_x,
             catelog_bug.transform.position.y,
             catelog_bug.transform.position.z);

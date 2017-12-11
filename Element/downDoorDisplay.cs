@@ -2,7 +2,7 @@
 using System.Collections;
 using HutongGames.PlayMaker;
 using UnityEngine.UI;
-using Assets.Script.ODM_Widget;
+
 
 public class downDoorDisplay : MonoBehaviour
 {
@@ -24,11 +24,11 @@ public class downDoorDisplay : MonoBehaviour
     {
         if (mainMap.downDoor != null)
         {
-            if (eventCenter.getFlagBool("Area " + mainMap.name))
+            if (eventCenter.getFlagBool(ODMVariable.convert.getAreaFlag(mainMap.name)))
                 GetComponent<CanvasGroup>().alpha = 1f;
             else if (downMap != null)
             {
-                if (eventCenter.getFlagBool("Area " + downMap.name))
+                if (eventCenter.getFlagBool(ODMVariable.convert.getAreaFlag(downMap.name)))
                     GetComponent<CanvasGroup>().alpha = 1f;
                 else
                     GetComponent<CanvasGroup>().alpha = 0f;
@@ -45,7 +45,7 @@ public class downDoorDisplay : MonoBehaviour
     {
         if (mainMap.downDoor != null)
         {
-            string doorFlag = mainMap.name + " Down Door";
+            string doorFlag = ODMVariable.convert.getDownDoorFlag(mainMap.name);
             if (eventCenter.getFlagBool(doorFlag))
                 GetComponent<Image>().color = CGreen;
             else

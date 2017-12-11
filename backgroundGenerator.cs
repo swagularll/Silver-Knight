@@ -22,11 +22,11 @@ public class backgroundGenerator : MonoBehaviour
         {
             for (int i = 0; i < imageCount; i++)
             {
-                spriteCollection.Add(Resources.Load<Sprite>("Background/" + "Wallspecial" + i.ToString("D2")));
+                spriteCollection.Add(Resources.Load<Sprite>(ODMVariable.resource.wall_special_file_name + i.ToString("D2")));
             }
             for (int i = 0; i < baseimageCount; i++)
             {
-                spriteBaseCollection.Add(Resources.Load<Sprite>("Background/" + "Wallbase" + i.ToString("D2")));
+                spriteBaseCollection.Add(Resources.Load<Sprite>(ODMVariable.resource.wall_file_name + i.ToString("D2")));
             }
         }
         for (int i = 0; i < mapSize; i++)

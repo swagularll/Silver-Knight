@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using HutongGames.PlayMaker;
 using System;
-using Assets.Script.ODM_Widget;
+
 
 public class mapSquare : MonoBehaviour
 {
@@ -49,39 +49,39 @@ public class mapSquare : MonoBehaviour
     void Start()
     {
         eventManager = ODMObject.event_manager;
-        UiInfomationHolder uiInfo = FsmVariables.GlobalVariables.GetFsmGameObject("Language Translator").Value.GetComponent<UiInfomationHolder>();
+        UiInfomationHolder uiInfo = ODMObject.language_translator.GetComponent<UiInfomationHolder>();
 
-        txt_selectedLocation = uiInfo.getText("Map Info selectedLocation");
-        txt_rightDoor = uiInfo.getText("Map Info rightDoor");
-        txt_leftDoor = uiInfo.getText("Map Info leftDoor");
-        txt_upDoor = uiInfo.getText("Map Info upDoor");
-        txt_downDoor = uiInfo.getText("Map Info downDoor");
-        txt_Unexplored = uiInfo.getText("Map Info unexplored");
-        txt_not_explored = uiInfo.getText("Map Info not explored");
+        txt_selectedLocation = uiInfo.getText(ODMVariable.translation.map_info_selected_location);
+        txt_rightDoor = uiInfo.getText(ODMVariable.translation.map_info_right_door);
+        txt_leftDoor = uiInfo.getText(ODMVariable.translation.map_info_left_door);
+        txt_upDoor = uiInfo.getText(ODMVariable.translation.map_info_up_door);
+        txt_downDoor = uiInfo.getText(ODMVariable.translation.map_info_down_door);
+        txt_Unexplored = uiInfo.getText(ODMVariable.translation.map_info_unexplored);
+        txt_not_explored = uiInfo.getText(ODMVariable.translation.map_info_not_explored);
 
-        txt_accessible = uiInfo.getText("accessible");
+        txt_accessible = uiInfo.getText(ODMVariable.translation.accessible);
 
 
         generateInfo();
-        state = eventManager.GetComponent<eventCenter>().getFlagBool("Area " + selfRef.name);
+        state = eventManager.GetComponent<eventCenter>().getFlagBool(ODMVariable.convert.getAreaFlag(selfRef.name));
         ani = GetComponent<Animator>();
     }
 
     public void setColor()
     {
-        ani.SetBool("isExplored", state);
-        ani.SetBool("isSelected", false);
-        ani.SetBool("isCurrent", false);
+        ani.SetBool(ODMVariable.animation.is_explored, state);
+        ani.SetBool(ODMVariable.animation.is_selected, false);
+        ani.SetBool(ODMVariable.animation.is_current, false);
     }
 
     public void setSelected()
     {
-        ani.SetBool("isSelected", true);
+        ani.SetBool(ODMVariable.animation.is_selected, true);
     }
 
     public void setCurrent()
     {
-        ani.SetBool("isCurrent", true);
+        ani.SetBool(ODMVariable.animation.is_current, true);
     }
 
     private void generateInfo()
@@ -110,13 +110,13 @@ public class mapSquare : MonoBehaviour
         lbl_right_door.GetComponent<rightDoorDisplay>().mainMap = selfRef;
         lbl_down_door.GetComponent<downDoorDisplay>().mainMap = selfRef;
 
-        if (currentX != eventManager.GetComponent<mapDash>().X_limit)
+        if (currentX != eventManager.GetComponent<mapDash>().limit_x)
         {
             CMap rightMap = eventManager.GetComponent<mapDash>().db.getMap(currentX + 1, currentY);
             lbl_right_door.GetComponent<rightDoorDisplay>().rightMap = rightMap;
         }
 
-        if (currentY != eventManager.GetComponent<mapDash>().Y_limit)
+        if (currentY != eventManager.GetComponent<mapDash>().limit_y)
         {
             CMap downMap = eventManager.GetComponent<mapDash>().db.getMap(currentX, currentY + 1);
             lbl_down_door.GetComponent<downDoorDisplay>().downMap = downMap;
@@ -128,7 +128,7 @@ public class mapSquare : MonoBehaviour
             if (leftMap.rightDoor != null)
             {
                 leftDoor = leftMap.rightDoor;
-                string leftDoorFlag = leftMap.name + " Right Door";
+                string leftDoorFlag = ODMVariable.convert.getRightDoorFlag(leftMap.name);
                 if (!eventManager.GetComponent<eventCenter>().getFlagBool(leftDoorFlag))
                     leftDoorInfo = txt_leftDoor + leftMap.rightDoor.Hint + Environment.NewLine + Environment.NewLine;
                 else
@@ -141,7 +141,7 @@ public class mapSquare : MonoBehaviour
             if (upMap.downDoor != null)
             {
                 upDoor = upMap.downDoor;
-                string upDoorFlag = upMap.name + " Down Door";
+                string upDoorFlag = ODMVariable.convert.getDownDoorFlag(upMap.name);
                 if (!eventManager.GetComponent<eventCenter>().getFlagBool(upDoorFlag))
                     updoorInfo = txt_upDoor + upMap.downDoor.Hint + Environment.NewLine + Environment.NewLine;
                 else
@@ -151,7 +151,7 @@ public class mapSquare : MonoBehaviour
 
         if (selfRef.rightDoor != null)
         {
-            string rightDoorFlag = selfRef.name + " Right Door";
+            string rightDoorFlag = ODMVariable.convert.getRightDoorFlag(selfRef.name);
             if (!eventManager.GetComponent<eventCenter>().getFlagBool(rightDoorFlag))
                 rightDoorInfo = txt_rightDoor + selfRef.rightDoor.Hint + Environment.NewLine + Environment.NewLine;
             else
@@ -161,7 +161,7 @@ public class mapSquare : MonoBehaviour
 
         if (selfRef.downDoor != null)
         {
-            string downDoorFlag = selfRef.name + " Down Door";
+            string downDoorFlag = ODMVariable.convert.getDownDoorFlag(selfRef.name);
             if (!eventManager.GetComponent<eventCenter>().getFlagBool(downDoorFlag))
                 downDoorInfo = txt_downDoor + selfRef.downDoor.Hint + Environment.NewLine + Environment.NewLine;
             else

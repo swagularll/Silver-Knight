@@ -2,12 +2,11 @@
 using System.Collections;
 using System;
 using HutongGames.PlayMaker;
-using Assets.Script.ODM_Widget;
+
 
 public class mapSetting : MonoBehaviour
 {
-    public inventoryDash.inventoryItem requiredItem;
-    public string successfulMsg;
+    public ODMVariable.itemCatalogue requiredItem;
 
     public bool isElectricalDoor = false;
     public bool allowAutoItem = true;
@@ -33,9 +32,8 @@ public class mapSetting : MonoBehaviour
 
     void Start()
     {
-
-        successfulMsg = "showOpenDoor";
-        requiredItem = inventoryDash.inventoryItem.none;
+       
+        requiredItem = ODMVariable.itemCatalogue.none;
 
         eventManager = ODMObject.event_manager;
 
@@ -64,7 +62,7 @@ public class mapSetting : MonoBehaviour
         }
         else
         {
-            if (requiredItem != inventoryDash.inventoryItem.none)
+            if (requiredItem != ODMVariable.itemCatalogue.none)
             {
                 int requiredItemID = (int)requiredItem;
                 bool hasItem = eventCenter.checkItemExist(requiredItemID);
@@ -73,7 +71,7 @@ public class mapSetting : MonoBehaviour
                     eventCenter.tryUseItem(requiredItemID);
                     //FsmVariables.GlobalVariables.GetFsmGameObject("currentEventObject").Value = transform.gameObject;
                     dialogue.currentSlotItem = itemDB.getItem(requiredItemID).title;
-                    dialogue.showMessage(successfulMsg);
+                    dialogue.showMessage(ODMVariable.translation.show_open_door);
                     eventCenter.setFlagTrue(flagName);
                     setDoorTexture();
                     if (isElectricalDoor)
@@ -94,7 +92,7 @@ public class mapSetting : MonoBehaviour
                 aud.clip = lockedSound;
                 aud.Play();
                 dialogue.showMessage(flagName);
-                ODM.errorLog(transform.name, "mapSetting missing required item.", "");
+                ODM.errorLog(transform.name, "mapSetting missing required item.");
             }
         }
     }
@@ -131,13 +129,13 @@ public class mapSetting : MonoBehaviour
         }
         catch (Exception ex)
         {
-            ODM.errorLog(transform.name, "setLocationString Error.", ex.ToString());
+            ODM.errorLog(transform.name, "setLocationString Error: "+ ex.ToString());
         }
         return nextSceneName;
     }
     public void loadScene()
     {
-        FsmVariables.GlobalVariables.GetFsmString("fromDoor").Value = transform.name;
+        ODMVariable.world.from_door = transform.name;
         Application.LoadLevel(nextSceneName);
     }
 
@@ -150,46 +148,47 @@ public class mapSetting : MonoBehaviour
                 if (eventManager.GetComponent<eventCenter>().getFlagBool(flagName))
                 {
                     if (transform.name.IndexOf("Left") != -1)
-                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Background/Left Door Unlocked");
+                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(ODMVariable.resource.left_door_unlocked);
                     if (transform.name.IndexOf("Right") != -1)
-                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Background/Right Door Unlocked");
+                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(ODMVariable.resource.right_door_unlocked);
                     if (transform.name.IndexOf("Up") != -1 || transform.name.IndexOf("Down") != -1)
-                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Background/Door Unlocked");
+                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(ODMVariable.resource.door_unlocked);
                 }
                 else
                 {
                     if (transform.name.IndexOf("Left") != -1)
-                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Background/Left Door Locked");
+                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(ODMVariable.resource.left_door_locked);
                     if (transform.name.IndexOf("Right") != -1)
-                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Background/Right Door Locked");
+                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(ODMVariable.resource.right_door_locked);
                     if (transform.name.IndexOf("Up") != -1 || transform.name.IndexOf("Down") != -1)
-                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Background/Door Locked");
+                        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(ODMVariable.resource.door_locked);
                 }
             }
             catch (Exception ex)
             {
-                ODM.errorLog(transform.name, "setDoorTexture Error.", ex.ToString());
+                ODM.errorLog(transform.name, "setDoorTexture Error: " + ex.ToString());
             }
         }
     }
 
     public string identifyDoorFlagName()
     {
+        //Improvement
         string currentSceneName = Application.loadedLevelName;
         string targetFlagName = "";
-        if (transform.name.IndexOf("Map Up") != -1)
+        if (transform.name.IndexOf(ODMVariable.text.map_up) != -1)
         {
             targetFlagName = char.ConvertFromUtf32(System.Text.Encoding.ASCII.GetBytes(currentSceneName[0].ToString())[0] - 1) + currentSceneName[1] + " Down Door";
         }
-        if (transform.name.IndexOf("Map Down") != -1)
+        if (transform.name.IndexOf(ODMVariable.text.map_down) != -1)
         {
-            targetFlagName = currentSceneName + " Down Door";
+            targetFlagName = ODMVariable.convert.getDownDoorFlag(currentSceneName);
         }
-        if (transform.name.IndexOf("Map Right") != -1)
+        if (transform.name.IndexOf(ODMVariable.text.map_right) != -1)
         {
-            targetFlagName = currentSceneName + " Right Door";
+            targetFlagName = ODMVariable.convert.getRightDoorFlag(currentSceneName);
         }
-        if (transform.name.IndexOf("Map Left") != -1)
+        if (transform.name.IndexOf(ODMVariable.text.map_left) != -1)
         {
             targetFlagName = currentSceneName[0] + char.ConvertFromUtf32(System.Text.Encoding.ASCII.GetBytes(currentSceneName[1].ToString())[0] - 1) + " Right Door";
         }

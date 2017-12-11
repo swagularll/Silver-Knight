@@ -5,7 +5,8 @@ using LitJson;
 using HutongGames.PlayMaker;
 using System.Text;
 
-public class testingSystemLoader : MonoBehaviour {
+public class testingSystemLoader : MonoBehaviour
+{
 
     public bool isSaveLock = true;
     public string lang;
@@ -13,28 +14,10 @@ public class testingSystemLoader : MonoBehaviour {
 
     void Awake()
     {
-        PlayerPrefs.SetString("lang", lang);
-        PlayerPrefs.SetString("save_code", "Test");
-        //PlayerPrefs.SetString("development_level", Application.loadedLevelName);
+        ODMVariable.system.lang = lang;
+        ODMVariable.system.save_code = "Test";
 
-
-        switch (difficulty)
-        {
-            case -1:
-                break;
-            case 1:
-                PlayerPrefs.SetInt("game_difficulty", 1);
-                break;
-            case 2:
-                PlayerPrefs.SetInt("game_difficulty", 2);
-                break;
-            case 3:
-                PlayerPrefs.SetInt("game_difficulty", 3);
-                break;
-            case 4:
-                PlayerPrefs.SetInt("game_difficulty", 4);
-                break;
-        }
+        ODMVariable.game_difficulty = difficulty == -1 ? difficulty : 1;
 
         //Debug.Log("save_code: " + PlayerPrefs.GetString("save_code"));
         //string fileAddress = Application.dataPath + "/ODM Settings.txt";

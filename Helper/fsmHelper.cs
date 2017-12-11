@@ -5,13 +5,13 @@ using System;
 public class fsmHelper
 {
 
-    public static PlayMakerFSM getFsm(string objName, string fsmName)
+    public static PlayMakerFSM getFsm(string _obj_name, string _fsm_name)
     {
         PlayMakerFSM fsm = null;
-        PlayMakerFSM[] temp = GameObject.Find(objName).GetComponents<PlayMakerFSM>();
+        PlayMakerFSM[] temp = GameObject.Find(_obj_name).GetComponents<PlayMakerFSM>();
         foreach (PlayMakerFSM f in temp)
         {
-            if (f.FsmName.Equals(fsmName))
+            if (f.FsmName.Equals(_fsm_name))
             {
                 fsm = f;
                 break;
@@ -20,15 +20,15 @@ public class fsmHelper
         return fsm;
     }
 
-    public static PlayMakerFSM getFsm(GameObject target, string fsmName)
+    public static PlayMakerFSM getFsm(GameObject _target, string _fsm_name)
     {
         try
         {
             PlayMakerFSM fsm = null;
-            PlayMakerFSM[] temp = target.GetComponents<PlayMakerFSM>();
+            PlayMakerFSM[] temp = _target.GetComponents<PlayMakerFSM>();
             foreach (PlayMakerFSM f in temp)
             {
-                if (f.FsmName.Equals(fsmName))
+                if (f.FsmName.Equals(_fsm_name))
                 {
                     fsm = f;
                     break;
@@ -38,9 +38,8 @@ public class fsmHelper
         }
         catch (Exception ex)
         {
-            ODM.errorLog("Static", "Holder:" + target + ", fsmName: " + fsmName, ex.ToString());
+            ODM.errorLog("fsmHelper", "Target:" + _target + ", Fsm:" + _fsm_name + ", Error:" + ex.ToString());
         }
         return null;
-
     }
 }

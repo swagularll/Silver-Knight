@@ -2,7 +2,7 @@
 using System.Collections;
 using HutongGames.PlayMaker;
 using UnityEngine.UI;
-using Assets.Script.ODM_Widget;
+
 
 public class rightDoorDisplay : MonoBehaviour
 {
@@ -10,10 +10,6 @@ public class rightDoorDisplay : MonoBehaviour
     public CMap mainMap;
     public CMap rightMap;
     private eventCenter eventCenter;
-
-    private Color32 CGreen = new Color32(73, 219, 61, 255);
-    private Color32 CRed = new Color32(212, 8, 8, 255);
-
 
     void Start()
     {
@@ -24,11 +20,11 @@ public class rightDoorDisplay : MonoBehaviour
     {
         if (mainMap.rightDoor != null)
         {
-            if (eventCenter.getFlagBool("Area " + mainMap.name))
+            if (eventCenter.getFlagBool(ODMVariable.convert.getAreaFlag(mainMap.name)))
                 GetComponent<CanvasGroup>().alpha = 1f;
             else if (rightMap != null)
             {
-                if (eventCenter.getFlagBool("Area " + rightMap.name))
+                if (eventCenter.getFlagBool(ODMVariable.convert.getAreaFlag(rightMap.name)))
                     GetComponent<CanvasGroup>().alpha = 1f;
                 else
                     GetComponent<CanvasGroup>().alpha = 0f;
@@ -49,11 +45,11 @@ public class rightDoorDisplay : MonoBehaviour
     {
         if (mainMap.rightDoor != null)
         {
-            string doorFlag = mainMap.name + " Right Door";
+            string doorFlag = ODMVariable.convert.getRightDoorFlag(mainMap.name);
             if (eventCenter.getFlagBool(doorFlag))
-                GetComponent<Image>().color = CGreen;
+                GetComponent<Image>().color = ODMVariable.color.green_accessable_door;
             else
-                GetComponent<Image>().color = CRed;
+                GetComponent<Image>().color = ODMVariable.color.red_blocked_door;
         }
     }
 }

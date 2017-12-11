@@ -10,8 +10,8 @@ public class guiBoolMonitor : MonoBehaviour {
     public string false_key = "";
     void Update () {
        if(FsmVariables.GlobalVariables.GetFsmBool(monitor_variable).Value)
-            GetComponent<Text>().text = FsmVariables.GlobalVariables.GetFsmGameObject("Language Translator").Value.GetComponent<UiInfomationHolder>().getText(true_key);
+            GetComponent<Text>().text = ODMObject.language_translator.GetComponent<UiInfomationHolder>().getText(true_key);
        else
-            GetComponent<Text>().text = FsmVariables.GlobalVariables.GetFsmGameObject("Language Translator").Value.GetComponent<UiInfomationHolder>().getText(false_key);
+            GetComponent<Text>().text = ODMObject.language_translator.GetComponent<UiInfomationHolder>().getText(false_key);
     }
 }

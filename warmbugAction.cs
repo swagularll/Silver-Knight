@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
-using Assets.Script.ODM_Widget;
 
 public class warmbugAction : MonoBehaviour
 {
@@ -23,9 +22,13 @@ public class warmbugAction : MonoBehaviour
 
     private warmbugLair ref_lair;
     private lairInfo lair_info;
-    private PlayMakerFSM healthFSM;
-    private PlayMakerFSM damageFSM;
-    private PlayMakerFSM warmbugAI_FSM;
+    private PlayMakerFSM health_fsm;
+    private PlayMakerFSM damage_fsm;
+    private PlayMakerFSM warmbug_ai_fsm;
+    private string health_fsm_name = "Health System";
+    private string damage_fsm_name = "Warmbug Damage";
+    private string warmbug_ai_fsm_name = "Warmbug AI";
+
 
     void Start()
     {
@@ -35,7 +38,6 @@ public class warmbugAction : MonoBehaviour
             getAbilitiesHealth();
             getAbilitiesDamage();
         }
-
     }
 
     public void initilization(warmbugLair _lair, lairInfo _lair_info, bool isLiving)
@@ -64,48 +66,45 @@ public class warmbugAction : MonoBehaviour
     {
         if (lair_info != null || soloBug)
         {
-            healthFSM = fsmHelper.getFsm(transform.gameObject, "Health System");
+            health_fsm = fsmHelper.getFsm(transform.gameObject, health_fsm_name);
 
-            int difficuly = PlayerPrefs.GetInt("game_difficulty");
-            float difficulyMagnification = 0f;
+            float difficuly_magnification = 0f;
 
-            switch (difficuly)
+            switch (ODMVariable.game_difficulty)
             {
                 case 1:
-                    difficulyMagnification = (float)lair_info.easyMagnification;
+                    difficuly_magnification = (float)lair_info.easyMagnification;
                     break;
                 case 2:
-                    difficulyMagnification = (float)lair_info.normalMagnification;
+                    difficuly_magnification = (float)lair_info.normalMagnification;
                     break;
                 case 3:
-                    difficulyMagnification = (float)lair_info.hardMagnification;
+                    difficuly_magnification = (float)lair_info.hardMagnification;
                     break;
                 case 4:
-                    difficulyMagnification = (float)lair_info.hellMagnification;
+                    difficuly_magnification = (float)lair_info.hellMagnification;
                     break;
             }
-            warmbug_hp = healthFSM.FsmVariables.GetFsmFloat("warmbug_hp").Value = (float)(warmbug_hp * difficulyMagnification);
-            sp_bonus = healthFSM.FsmVariables.GetFsmFloat("sp_bonus").Value = (float)(sp_bonus * difficulyMagnification);
+            warmbug_hp = health_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.warmbug_hp).Value = (float)(warmbug_hp * difficuly_magnification);
+            sp_bonus = health_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.sp_bonus).Value = (float)(sp_bonus * difficuly_magnification);
 
-            healthFSM.SendEvent("WB Ready");
+            health_fsm.SendEvent(eventName.warmbug_ready);
         }
         else
         {
             if (!soloBug)
-                ODM.errorLog(transform.name,
-                    "getAbilitiesHealth Missing LairInfo", "");
+                ODM.errorLog(transform.name, "getAbilitiesDamage missing LairInfo.");
         }
     }
     public void getAbilitiesDamage()
     {
         if (lair_info != null || soloBug)
         {
-            damageFSM = fsmHelper.getFsm(transform.gameObject, "Warmbug Damage");
-            warmbugAI_FSM = fsmHelper.getFsm(transform.gameObject, "Warmbug AI");
+            damage_fsm = fsmHelper.getFsm(transform.gameObject, damage_fsm_name);
+            warmbug_ai_fsm = fsmHelper.getFsm(transform.gameObject, warmbug_ai_fsm_name);
 
-            int difficuly = PlayerPrefs.GetInt("game_difficulty");
             float difficulyMagnification = 0f;
-            switch (difficuly)
+            switch (ODMVariable.game_difficulty)
             {
                 case 1:
                     difficulyMagnification = 0.5f;
@@ -120,23 +119,23 @@ public class warmbugAction : MonoBehaviour
                     difficulyMagnification = 2.7f;
                     break;
             }
-            armor_creak = damageFSM.FsmVariables.GetFsmFloat("armor_creak").Value = (float)(armor_creak * difficulyMagnification);
-            normal_damage = damageFSM.FsmVariables.GetFsmFloat("normal_damage").Value = (float)(normal_damage * difficulyMagnification);
-            normal_sp_damage = damageFSM.FsmVariables.GetFsmFloat("normal_sp_damage").Value = (float)(normal_sp_damage * difficulyMagnification);
-            melee_damage = damageFSM.FsmVariables.GetFsmFloat("melee_damage").Value = (float)(melee_damage * difficulyMagnification);
-            mate_critial_hit = damageFSM.FsmVariables.GetFsmFloat("mate_critial_hit").Value = (float)(mate_critial_hit * difficulyMagnification);
-            feed_critial_hit = damageFSM.FsmVariables.GetFsmFloat("feed_critial_hit").Value = (float)(feed_critial_hit * difficulyMagnification);
-            damageFSM.SendEvent("WB Ready");
+            armor_creak = damage_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.armor_creak).Value = (float)(armor_creak * difficulyMagnification);
+            normal_damage = damage_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.normal_damage).Value = (float)(normal_damage * difficulyMagnification);
+            normal_sp_damage = damage_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.normal_sp_damage).Value = (float)(normal_sp_damage * difficulyMagnification);
+            melee_damage = damage_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.melee_damage).Value = (float)(melee_damage * difficulyMagnification);
+            mate_critial_hit = damage_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.mate_critial_hit).Value = (float)(mate_critial_hit * difficulyMagnification);
+            feed_critial_hit = damage_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.feed_critial_hit).Value = (float)(feed_critial_hit * difficulyMagnification);
+            damage_fsm.SendEvent(eventName.warmbug_ready);
 
             //Constant Value
-            warmbugAI_FSM.FsmVariables.GetFsmFloat("base_warmbug_mate_force").Value = base_warmbug_mate_force;
-            warmbugAI_FSM.FsmVariables.GetFsmFloat("base_warmbug_feed_force").Value = base_warmbug_feed_force;
-            warmbugAI_FSM.SendEvent("WB Ready");
+            warmbug_ai_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.base_warmbug_mate_force).Value = base_warmbug_mate_force;
+            warmbug_ai_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.base_warmbug_feed_force).Value = base_warmbug_feed_force;
+            warmbug_ai_fsm.SendEvent(eventName.warmbug_ready);
         }
         else
         {
             if (!soloBug)
-                ODM.errorLog(transform.name,"getAbilitiesDamage Missing LairInfo", "");
+                ODM.errorLog(transform.name, "getAbilitiesDamage missing LairInfo.");
         }
     }
 }

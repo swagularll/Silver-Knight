@@ -6,7 +6,6 @@ using UnityEngine.UI;
 using System;
 using System.Linq;
 using HutongGames.PlayMaker;
-using Assets.Script.ODM_Widget;
 
 public class documentDash : MonoBehaviour
 {
@@ -14,17 +13,18 @@ public class documentDash : MonoBehaviour
     public TextAsset txtSource;
     public GameObject model_btnDocument;
     public GameObject model_txtDocumentName;
-    private GameObject contextArea;
-    private GameObject docuemtTitle;
+
+
+    public GameObject document_text_page_count;
+    public GameObject document_context_area_text;
+    public GameObject document_title_in_sheet;
+    public GameObject document_context_area;
+    public GameObject document_text_page;
+    public GameObject document_hint_read;
+    public GameObject document_hint_selection;
+
     private GameObject converText;
-    private GameObject textListPage;
-    private GameObject textDocumentPage;
-    private GameObject documentPaper;
-    private GameObject useHint;
-    private GameObject selectionHint;
-
-
-
+    
 
     //public bool DOCUMENT_LOCK = false;
 
@@ -50,8 +50,12 @@ public class documentDash : MonoBehaviour
     private int currentListPage = -1;
     private int maxListPage = -1;
 
-    private string img_itemSelected = "UI/[UI]Item Selection";
-    private string img_itemUnselected = "UI/[UI]Harf Transparent Side B Full";
+    //private string img_itemSelected = "UI/[UI]Item Selection";
+    //private string img_itemUnselected = "UI/[UI]Harf Transparent Side B Full";
+
+    public Sprite img_item_selected;
+    public Sprite img_item_unselected;
+
 
     private Color32 CSelectedColor = new Color32(255, 255, 255, 255);
     private Color32 CUnselectedColor = new Color32(45, 45, 45, 150);
@@ -62,19 +66,13 @@ public class documentDash : MonoBehaviour
         documentCollection = new List<CDocument>();
         buttonCollection = new List<GameObject>();
         txtDocumentTagCollection = new List<GameObject>();
+        //renew code
 
-        string documentPath = @"Data Collection\" + PlayerPrefs.GetString("lang") + @"\Document";
-        txtSource = Resources.Load<TextAsset>(documentPath);
+        txtSource = Resources.Load<TextAsset>(ODMVariable.path.document_resource);
 
         txtContent = txtSource.text.Split('\n');
         aud = GetComponent<AudioSource>();
-        textListPage = GameObject.Find("Text Document Page Count");
-        contextArea = GameObject.Find("Document Context Area Text");
-        docuemtTitle = GameObject.Find("Document Title in Sheet");
-        documentPaper = GameObject.Find("Document Context Area");
-        textDocumentPage = GameObject.Find("txtDocumentPage");
-        useHint = GameObject.Find("Read Document Hint");
-        selectionHint = GameObject.Find("Select Document Hint");
+
         initializeDocumentList();
     }
 
@@ -85,13 +83,13 @@ public class documentDash : MonoBehaviour
             stateControl = true;//for the first time loading
             nextDocument();
         }
-        else if (documentSelectSwitch && stateControl && !FsmVariables.GlobalVariables.GetFsmBool("isSystemLock").Value)//Document Select section
+        else if (documentSelectSwitch && stateControl && !ODMVariable.is_system_locked)//Document Select section
         {
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
                 if (getSlotIndex() == slotCount - 1)//last document cannot go down
                 {
-                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioResource.selection_negative);
                     aud.Play();
                 }
                 else
@@ -100,7 +98,7 @@ public class documentDash : MonoBehaviour
                     if (isReadingDocument)
                         stopManagement();
                     nextDocument();
-                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioResource.selection_switch);
                     aud.Play();
                 }
             }
@@ -117,7 +115,7 @@ public class documentDash : MonoBehaviour
                     if (isReadingDocument)
                         stopManagement();
                     previousDocument();
-                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioResource.selection_switch);
                     aud.Play();
                 }
             }
@@ -129,12 +127,12 @@ public class documentDash : MonoBehaviour
                     if (currentListPage < maxListPage)//List
                     {
                         nextListPage();
-                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
+                        aud.clip = Resources.Load<AudioClip>(audioResource.selection_switch);
                         aud.Play();
                     }
                     else//Last list
                     {
-                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
+                        aud.clip = Resources.Load<AudioClip>(audioResource.selection_negative);
                         aud.Play();
                     }
                 }
@@ -144,12 +142,12 @@ public class documentDash : MonoBehaviour
                     {
                         currentDocumentPage++;
                         switchDocumentPage();
-                        aud.clip = Resources.Load<AudioClip>(audioManager.pageTurn);
+                        aud.clip = Resources.Load<AudioClip>(audioResource.page_turn);
                         aud.Play();
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
+                        aud.clip = Resources.Load<AudioClip>(audioResource.negative_small);
                         aud.Play();
                     }
                 }
@@ -163,11 +161,11 @@ public class documentDash : MonoBehaviour
                     if (currentListPage != 1)//List
                     {
                         previousListPage();
-                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
+                        aud.clip = Resources.Load<AudioClip>(audioResource.selection_switch);
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
+                        aud.clip = Resources.Load<AudioClip>(audioResource.selection_negative);
                     }
                     aud.Play();
                 }
@@ -177,12 +175,12 @@ public class documentDash : MonoBehaviour
                     {
                         currentDocumentPage--;
                         switchDocumentPage();
-                        aud.clip = Resources.Load<AudioClip>(audioManager.pageTurn);
+                        aud.clip = Resources.Load<AudioClip>(audioResource.page_turn);
                         aud.Play();
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
+                        aud.clip = Resources.Load<AudioClip>(audioResource.negative_small);
                         aud.Play();
                     }
                 }
@@ -196,7 +194,7 @@ public class documentDash : MonoBehaviour
                 {
                     if (!isReadingDocument)
                     {
-                        aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
+                        aud.clip = Resources.Load<AudioClip>(audioResource.electrical);
                         aud.Play();
                         startManagement();
                         showDocument();
@@ -204,13 +202,13 @@ public class documentDash : MonoBehaviour
                     }
                     else
                     {
-                        aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
+                        aud.clip = Resources.Load<AudioClip>(audioResource.negative_small);
                         aud.Play();
                     }
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(audioManager.negativeSmall);
+                    aud.clip = Resources.Load<AudioClip>(audioResource.negative_small);
                     aud.Play();
                 }
             }
@@ -220,7 +218,7 @@ public class documentDash : MonoBehaviour
                 if (isReadingDocument)
                 {
                     stopManagement();
-                    aud.clip = Resources.Load<AudioClip>(audioManager.electricalExit);
+                    aud.clip = Resources.Load<AudioClip>(audioResource.electrical_out);
                     aud.Play();
                 }
                 else
@@ -309,20 +307,20 @@ public class documentDash : MonoBehaviour
     private void stopManagement()
     {
         isReadingDocument = false;
-        textDocumentPage.GetComponent<CanvasGroup>().alpha = 0;
+        document_text_page.GetComponent<CanvasGroup>().alpha = 0;
         GameObject.Find("Document Left Arrow").GetComponent<CanvasGroup>().alpha = 0;
         GameObject.Find("Document Right Arrow").GetComponent<CanvasGroup>().alpha = 0;
-        docuemtTitle.GetComponent<CanvasGroup>().alpha = 1;
-        useHint.GetComponent<CanvasGroup>().alpha = 1;
-        contextArea.GetComponent<CanvasGroup>().alpha = 0;
+        document_title_in_sheet.GetComponent<CanvasGroup>().alpha = 1;
+        document_hint_read.GetComponent<CanvasGroup>().alpha = 1;
+        document_context_area_text.GetComponent<CanvasGroup>().alpha = 0;
     }
     private void startManagement()
     {
         isReadingDocument = true;
-        docuemtTitle.GetComponent<CanvasGroup>().alpha = 0;
-        useHint.GetComponent<CanvasGroup>().alpha = 0;
-        contextArea.GetComponent<CanvasGroup>().alpha = 1;
-        textDocumentPage.GetComponent<CanvasGroup>().alpha = 1;
+        document_title_in_sheet.GetComponent<CanvasGroup>().alpha = 0;
+        document_hint_read.GetComponent<CanvasGroup>().alpha = 0;
+        document_context_area_text.GetComponent<CanvasGroup>().alpha = 1;
+        document_text_page.GetComponent<CanvasGroup>().alpha = 1;
     }
     private void setCover()
     {
@@ -332,32 +330,32 @@ public class documentDash : MonoBehaviour
             CDocument d = documentCollection[currentSelectedIndex];
             if (d.Unlocked)
             {
-                selectionHint.GetComponent<CanvasGroup>().alpha = 1;
+                document_hint_selection.GetComponent<CanvasGroup>().alpha = 1;
 
-                docuemtTitle.GetComponent<CanvasGroup>().alpha = 1;
-                useHint.GetComponent<CanvasGroup>().alpha = 1;
-                docuemtTitle.GetComponent<Text>().text = d.Name;
-                documentPaper.GetComponent<Animator>().SetBool("isOpen", true);
+                document_title_in_sheet.GetComponent<CanvasGroup>().alpha = 1;
+                document_hint_read.GetComponent<CanvasGroup>().alpha = 1;
+                document_title_in_sheet.GetComponent<Text>().text = d.Name;
+                document_context_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
             }
             else
             {
-                selectionHint.GetComponent<CanvasGroup>().alpha = 1;
-                docuemtTitle.GetComponent<CanvasGroup>().alpha = 0;
-                useHint.GetComponent<CanvasGroup>().alpha = 0;
-                documentPaper.GetComponent<Animator>().SetBool("isOpen", false);
+                document_hint_selection.GetComponent<CanvasGroup>().alpha = 1;
+                document_title_in_sheet.GetComponent<CanvasGroup>().alpha = 0;
+                document_hint_read.GetComponent<CanvasGroup>().alpha = 0;
+                document_context_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
             }
         }
         else
         {
-            selectionHint.GetComponent<CanvasGroup>().alpha = 0;
+            document_hint_selection.GetComponent<CanvasGroup>().alpha = 0;
 
             GameObject.Find("Document Left Arrow").GetComponent<CanvasGroup>().alpha = 0;
             GameObject.Find("Document Right Arrow").GetComponent<CanvasGroup>().alpha = 0;
-            textDocumentPage.GetComponent<CanvasGroup>().alpha = 0;
-            docuemtTitle.GetComponent<CanvasGroup>().alpha = 0;
-            useHint.GetComponent<CanvasGroup>().alpha = 0;
-            contextArea.GetComponent<CanvasGroup>().alpha = 0;
-            documentPaper.GetComponent<Animator>().SetBool("isOpen", false);
+            document_text_page.GetComponent<CanvasGroup>().alpha = 0;
+            document_title_in_sheet.GetComponent<CanvasGroup>().alpha = 0;
+            document_hint_read.GetComponent<CanvasGroup>().alpha = 0;
+            document_context_area_text.GetComponent<CanvasGroup>().alpha = 0;
+            document_context_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
         }
     }
     private void refreshUnlocked()
@@ -374,7 +372,7 @@ public class documentDash : MonoBehaviour
         {
             maxListPage++;
         }
-        textListPage.GetComponent<Text>().text = currentListPage + "/" + maxListPage;
+        document_text_page_count.GetComponent<Text>().text = currentListPage + "/" + maxListPage;
     }
     private void setSelection()
     {
@@ -388,17 +386,17 @@ public class documentDash : MonoBehaviour
 
             if (getSlotIndex() == i)//selected
             {
-                buttonCollection[i].GetComponent<Image>().sprite = Resources.Load<Sprite>(img_itemSelected);
+                buttonCollection[i].GetComponent<Image>().sprite = img_item_selected; // Resources.Load<Sprite>(img_itemSelected);
                 buttonCollection[i].GetComponent<Image>().color = CSelectedColor;//is selected
             }
             else if (d.Unlocked)//locked
             {
-                buttonCollection[i].GetComponent<Image>().sprite = Resources.Load<Sprite>(img_itemUnselected);
+                buttonCollection[i].GetComponent<Image>().sprite = img_item_unselected;// Resources.Load<Sprite>(img_itemUnselected);
                 buttonCollection[i].GetComponent<Image>().color = CUnselectedColor; // unlocked
             }
             else
             {
-                buttonCollection[i].GetComponent<Image>().sprite = Resources.Load<Sprite>(img_itemUnselected);
+                buttonCollection[i].GetComponent<Image>().sprite = img_item_unselected;//Resources.Load<Sprite>(img_itemUnselected);
                 buttonCollection[i].GetComponent<Image>().color = CBlack; // locked
             }
         }
@@ -425,7 +423,7 @@ public class documentDash : MonoBehaviour
     private void switchDocumentPage()
     {
         CDocument d = documentCollection[currentSelectedIndex];
-        contextArea.GetComponent<Text>().text = d.Content[currentDocumentPage - 1];
+        document_context_area_text.GetComponent<Text>().text = d.Content[currentDocumentPage - 1];
 
         if (currentDocumentPage == d.Content.Count)//final page
         {
@@ -473,16 +471,16 @@ public class documentDash : MonoBehaviour
 
     public void openPanel()
     {
-        aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
+        aud.clip = Resources.Load<AudioClip>(audioResource.electrical);
         aud.Play();
         documentSelectSwitch = true;
         preSetting();
     }
     public void closePanel()
     {
-        aud.clip = Resources.Load<AudioClip>(audioManager.electricalExit);
+        aud.clip = Resources.Load<AudioClip>(audioResource.electrical_out);
         aud.Play();
-        GetComponent<menuManager>().tabSwitch = true;
+        GetComponent<menuManager>().disableMiddleTab();
         documentSelectSwitch = false;
         stateControl = false;
         currentSelectedIndex = -1;
@@ -498,10 +496,12 @@ public class documentDash : MonoBehaviour
     {
         CDocument doc = documentCollection.Where(d => d.Key.Equals(_documentFlagName)).FirstOrDefault();
         if (doc == null)
-            ODM.errorLog(transform.name, "getDocument Error. Key: " + _documentFlagName, "");
+            ODM.errorLog(transform.name, "getDocument Error. Key: " + _documentFlagName);
         return doc;
     }
 }
+
+#region LOCAL CLASS
 public class CDocument
 {
     public string Key { get; set; }
@@ -522,3 +522,4 @@ public class CDocument
 
     private List<string> content = new List<string>();
 }
+#endregion

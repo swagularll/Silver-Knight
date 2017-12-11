@@ -17,7 +17,7 @@ public class spineAudioManager : MonoBehaviour
         }
         catch (Exception ex)
         {
-            ODM.errorLog(this.transform.name,"", ex.ToString());
+            ODM.errorLog(transform.name, ex.ToString());
         }
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using LitJson;
-using Assets.Script.ODM_Widget;
 using HutongGames.PlayMaker;
 
 public class warmbugLairManager : MonoBehaviour
@@ -11,10 +10,20 @@ public class warmbugLairManager : MonoBehaviour
 
     private ODM.ODMDictionary warmbug_distribution_collection;//List of lair info is named distribution
     private Dictionary<string, GameObject> catalog_bug_entity_collection;
+
+    private void Awake()
+    {
+        catalog_bug_entity_collection = new Dictionary<string, GameObject>();
+        warmbug_distribution_collection = new ODM.ODMDictionary();
+    }
     void Start()
     {
         warmbug_distribution_collection = saveRecord.getCurrentRecord().lair_info_collection;
-        catalog_bug_entity_collection = null;// loadBugsFromSystem;XXX
+        catalog_bug_entity_collection.Add("Ambusher", Resources.Load<GameObject>(@"Warmbugs\Ambusher\0000\Ambusher"));
+        catalog_bug_entity_collection.Add("Inuji", Resources.Load<GameObject>(@"Warmbugs\Inuji\0000\Inuji"));
+        catalog_bug_entity_collection.Add("Larvae", Resources.Load<GameObject>(@"Warmbugs\Larvae\0000\Larvae"));
+        catalog_bug_entity_collection.Add("MECB", Resources.Load<GameObject>(@"Warmbugs\MECB\0000\MECB"));
+        catalog_bug_entity_collection.Add("Scorpion", Resources.Load<GameObject>(@"Warmbugs\Silencer\0000\Silencer"));
     }
 
     public void registerLair(string _level_name, string _level_warmbug_distribution)
@@ -68,7 +77,7 @@ public class warmbugLairManager : MonoBehaviour
         string[] map_name_collection = dataWidget.getMapName();
         for (int i = 0; i < map_name_collection.Length; i++)
         {
-            ODMObject.event_manager.GetComponent<eventCenter>().setFlagValue(map_name_collection[i] + " Warmbug Reset", _flag_value);
+            ODMObject.event_manager.GetComponent<eventCenter>().setFlagValue(ODMVariable.convert.getWarmbugResetFlag(map_name_collection[i]), _flag_value);
         }
     }
 }

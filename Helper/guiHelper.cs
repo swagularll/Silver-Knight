@@ -33,14 +33,14 @@ public class guiHelper : MonoBehaviour
         if (targetObj != null)
             targetObj.GetComponent<CanvasGroup>().alpha = 0;
         else
-            ODM.errorLog(transform.name, "hideTargetGUI error: no target object.", "");
+            ODM.errorLog(transform.name, "hideTargetGUI error: no target object.");
     }
     public void showTargetGUI()
     {
         if (targetObj != null)
             targetObj.GetComponent<CanvasGroup>().alpha = 1;
         else
-            ODM.errorLog(transform.name, "hideTargetGUI error: no target object.", "");
+            ODM.errorLog(transform.name, "hideTargetGUI error: no target object.");
     }
 
     public void updateText(float v)
@@ -52,12 +52,14 @@ public class guiHelper : MonoBehaviour
     {
         gameObject.GetComponent<Text>().text = v.ToString();
     }
-
-    public void showMessageText(string msg)
+    //Must be for mate bar
+    public void showMessageText(string _msg)
     {
-        PlayMakerFSM fsm = fsmHelper.getFsm(transform.gameObject, linked_fsm);
-        fsm.FsmVariables.GetFsmString("msg").Value = msg;
-        fsm.SendEvent("show message text");
+        //XXX
+        ODM.errorLog(transform.name, "guiHelper USELESS MESSAGE CALLED");
+        //PlayMakerFSM fsm = fsmHelper.getFsm(transform.gameObject, linked_fsm);
+        //fsm.FsmVariables.GetFsmString(ODMVariable.local.msg).Value = _msg;
+        //fsm.SendEvent(eventName.show_message);
     }
 
     private void setMiddle()
@@ -68,10 +70,10 @@ public class guiHelper : MonoBehaviour
 
     public void setResistantColor()
     {
-        GetComponent<Image>().color = new Color32(126, 41, 187, 255);
+        GetComponent<Image>().color = ODMVariable.color.resistant_bar;
     }
     public void setFeedColor()
     {
-        GetComponent<Image>().color = new Color32(219, 42, 82, 255);
+        GetComponent<Image>().color = ODMVariable.color.feed_bar;
     }
 }

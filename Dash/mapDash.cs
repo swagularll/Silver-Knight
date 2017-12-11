@@ -5,75 +5,69 @@ using System;
 using System.Collections.Generic;
 using LitJson;
 using HutongGames.PlayMaker;
-using Assets.Script.ODM_Widget;
 
 public class mapDash : MonoBehaviour
 {
+    //renew code
     public GameObject mapSquare;
     public GameObject mapSquareContainer;
     public GameObject holder;//for setting grid size
+    public GameObject txtMapInfoGeneralInformation;
+    public GameObject txtMapInfoCurrentSelected;
+    public GameObject panelSelectedMapInformationDisplay;
 
-
-    private bool mapPanelEnabled = false;
-    private bool stateControl = false;
-
-    private int currentSelectedX = -1;
-    private int currentSelectedY = -1;
-
-    private AudioSource aud;
-
-    public int X_limit = 9;
-    public int Y_limit = 5;
-
-    public List<List<GameObject>> mapSquareCollection;
+    public List<List<GameObject>> map_square_collection;
     public MapDatabase db;
 
+    private AudioSource aud;
+    private eventCenter event_center;
 
-    private CMap currentSelectedMap;
-    private CMap currentLevelMap;
+    private CMap current_selected_map;
+    private CMap current_level_map;
 
-    private eventCenter evnetCenter;
-    private int exploredMapNumber = 0;
+    private int explored_map_number = 0;
 
-    string[] mapNames;
+    private int current_selected_x = -1;
+    private int current_selected_y = -1;
+    public int limit_x = 9;
+    public int limit_y = 5;
+
+    private bool panel_enabled = false;
+    private bool state_control = false;
+
+    private string[] map_name_collection;
+
     private string txt_currentLocation;
     private string txt_explored;
     private string txt_unexplored;
     private string txt_exploredRate;
 
-    public GameObject txtMapInfoGeneralInformation;
-    public GameObject txtMapInfoCurrentSelected;
-    public GameObject panelSelectedMapInformationDisplay;
-
     void Awake()
     {
-        mapSquareCollection = new List<List<GameObject>>();
-
+        map_square_collection = new List<List<GameObject>>();
         db = GetComponent<MapDatabase>();
         aud = GetComponent<AudioSource>();
-        evnetCenter = GetComponent<eventCenter>();
+        event_center = GetComponent<eventCenter>();
     }
-
     void Start()
     {
-        mapNames = dataWidget.getMapName();
+        map_name_collection = dataWidget.getMapName();
         initializeMap();
-        txt_currentLocation = dataWidget.getTranslaton("Map Info currentLocation");//  GameObject.Find("Map Info currentLocation").GetComponent<Text>().text;
-        txt_explored = dataWidget.getTranslaton("Map Info explored");//GameObject.Find("Map Info explored rate").GetComponent<Text>().text;
-        txt_unexplored = dataWidget.getTranslaton("Map Info unexplored");//GameObject.Find("Map Info unexplored rate").GetComponent<Text>().text;
-        txt_exploredRate = dataWidget.getTranslaton("Map Info explored rate");//GameObject.Find("Map Info exploredRate").GetComponent<Text>().text;
+        txt_currentLocation = dataWidget.getTranslaton(ODMVariable.translation.map_info_currentlocation);
+        txt_explored = dataWidget.getTranslaton(ODMVariable.translation.map_info_explored);
+        txt_unexplored = dataWidget.getTranslaton(ODMVariable.translation.map_info_unexplored);
+        txt_exploredRate = dataWidget.getTranslaton(ODMVariable.translation.map_info_explored_rate);
     }
-
     void Update()
     {
-        if (mapPanelEnabled && !stateControl && !FsmVariables.GlobalVariables.GetFsmBool("isSystemLock").Value)
+        if (panel_enabled && !state_control && !ODMVariable.is_system_locked)
         {
-            aud.clip = Resources.Load<AudioClip>(audioManager.electrical);
+            aud.clip = Resources.Load<AudioClip>(audioResource.electrical);
             aud.Play();
-            stateControl = true;//for the first time loading
+            state_control = true;
             selectCurrentMap();//(-1, -1);
         }
-        else if (mapPanelEnabled && stateControl)//When the select function is enabled...
+        else if (panel_enabled && state_control && !ODMVariable.is_system_locked)
         {
             if (Input.GetKeyDown(KeyCode.X))
             {
@@ -82,14 +76,14 @@ public class mapDash : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                if (currentSelectedY == Y_limit)
+                if (current_selected_y == limit_y)
                 {
-                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioResource.selection_negative);
                 }
                 else//select next item
                 {
-                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
-                    currentSelectedY++;
+                    aud.clip = Resources.Load<AudioClip>(audioResource.selection_switch);
+                    current_selected_y++;
                     selectCurrentMap();//(0, -1);
                 }
                 aud.Play();
@@ -98,29 +92,29 @@ public class mapDash : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                if (currentSelectedY == 0)
+                if (current_selected_y == 0)
                 {
                     closePanel();
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
+                    aud.clip = Resources.Load<AudioClip>(audioResource.selection_switch);
                     aud.Play();
-                    currentSelectedY--;
+                    current_selected_y--;
                     selectCurrentMap();//(0, +1);
                 }
             }
 
             if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                if (currentSelectedX == X_limit)
+                if (current_selected_x == limit_x)
                 {
-                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioResource.selection_negative);
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
-                    currentSelectedX++;
+                    aud.clip = Resources.Load<AudioClip>(audioResource.selection_switch);
+                    current_selected_x++;
                     selectCurrentMap();//(-1, 0);
                 }
                 aud.Play();
@@ -129,74 +123,64 @@ public class mapDash : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                if (currentSelectedX == 0)
+                if (current_selected_x == 0)
                 {
-                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionNegative);
+                    aud.clip = Resources.Load<AudioClip>(audioResource.selection_negative);
                 }
                 else
                 {
-                    aud.clip = Resources.Load<AudioClip>(audioManager.selectionSwitch);
-                    currentSelectedX--;
+                    aud.clip = Resources.Load<AudioClip>(audioResource.selection_switch);
+                    current_selected_x--;
                     selectCurrentMap();//(1, 0);
                 }
                 aud.Play();
             }
         }
-
     }
-
     private void selectCurrentMap()
     {
         resetMapColor();
         showSelectedMapInfo();
     }
-
     private void getExploreRate()
     {
-        exploredMapNumber = 0;
-        for (int i = 0; i < mapNames.Length; i++)
+        explored_map_number = 0;
+        for (int i = 0; i < map_name_collection.Length; i++)
         {
-            if (evnetCenter.getFlagBool("Area " + mapNames[i]))
-                exploredMapNumber++;
+            if (event_center.getFlagBool(ODMVariable.convert.getAreaFlag(map_name_collection[i])))
+                explored_map_number++;
         }
-
     }
-
     public string getExlorationRateString()
     {
         getExploreRate();
-        double exloreRate = Convert.ToDouble(exploredMapNumber) / 60;
+        double exloreRate = Convert.ToDouble(explored_map_number) / 60;
         return (exloreRate * 100).ToString("F2") + "%";
     }
-
     private void showCurrentMapInfo()
     {
-        currentLevelMap = db.getMap(Application.loadedLevelName);
+        current_level_map = db.getMap(Application.loadedLevelName);
         getExploreRate();
-        double exloreRate = Convert.ToDouble(exploredMapNumber) / 60;
-        if (currentLevelMap != null)
+        double exloreRate = Convert.ToDouble(explored_map_number) / 60;
+        if (current_level_map != null)
         {
             string generalInfo =
-            txt_currentLocation + currentLevelMap.name + " - " + currentLevelMap.title + Environment.NewLine;
-            generalInfo += txt_explored + exploredMapNumber.ToString() + Environment.NewLine;
-            generalInfo += txt_unexplored + (60 - exploredMapNumber).ToString() + Environment.NewLine;
+            txt_currentLocation + current_level_map.name + " - " + current_level_map.title + Environment.NewLine;
+            generalInfo += txt_explored + explored_map_number.ToString() + Environment.NewLine;
+            generalInfo += txt_unexplored + (60 - explored_map_number).ToString() + Environment.NewLine;
             generalInfo += txt_exploredRate + (exloreRate * 100).ToString("F2") + "%" + Environment.NewLine;
 
             txtMapInfoGeneralInformation.GetComponent<Text>().text = generalInfo;
         }
     }
-
     private void initializeMap()
     {
         try
         {
-            //float sizeBase = (float)((mapSquareContainer.GetComponent<RectTransform>().rect.width * 0.1f) * 0.5);
-
             string[] s = { "A", "B", "C", "D", "E", "F", };
             for (int k = 0; k < 6; k++)
             {
                 GameObject hold = Instantiate(holder);
-                //hold.transform.GetComponent<GridLayoutGroup>().cellSize = new Vector2(sizeBase, sizeBase);
                 List<GameObject> mapLine = new List<GameObject>();
                 for (int i = 0; i < 10; i++)
                 {
@@ -207,50 +191,44 @@ public class mapDash : MonoBehaviour
                     square.transform.SetParent(hold.transform);
                     mapLine.Add(square);
                 }
-                mapSquareCollection.Add(mapLine);
+                map_square_collection.Add(mapLine);
                 hold.transform.SetParent(mapSquareContainer.transform);
             }
         }
         catch (Exception ex)
         {
-            ODM.errorLog(transform.name, "Failed to initilize map.", ex.ToString());
+            ODM.errorLog(transform.name, "Failed to initilize map. Message:" + ex.ToString());
         }
     }
-
     public void refreshMapSquareDoors()
     {
-        for (int i = 0; i < mapSquareCollection.Count; i++)
+        for (int i = 0; i < map_square_collection.Count; i++)
         {
-            for (int j = 0; j < mapSquareCollection[i].Count; j++)
+            for (int j = 0; j < map_square_collection[i].Count; j++)
             {
-                mapSquareCollection[i][j].GetComponent<mapSquare>().renewDoorStatus();
+                map_square_collection[i][j].GetComponent<mapSquare>().renewDoorStatus();
             }
         }
     }
-
     public void closePanel()
     {
         panelSelectedMapInformationDisplay.GetComponent<CanvasGroup>().alpha = 0;
-        aud.clip = Resources.Load<AudioClip>(audioManager.electricalExit);
+        aud.clip = Resources.Load<AudioClip>(audioResource.electrical_out);
         aud.Play();
+        GetComponent<menuManager>().disableMiddleTab();
         resetVariables();
-        GetComponent<menuManager>().tabSwitch = true; //make the top tab goes back to previous state...
         resetMapColor();
         getExploreRate();
     }
-
     public void openPanel()
     {
         panelSelectedMapInformationDisplay.GetComponent<CanvasGroup>().alpha = 1;
         showCurrentMapInfo();
         resetMapColor();
-        mapPanelEnabled = true;
-        currentSelectedX = 0;
-        currentSelectedY = 0;
+        panel_enabled = true;
+        current_selected_x = 0;
+        current_selected_y = 0;
     }
-
-
-
     public void preSetting()
     {
         showCurrentMapInfo();
@@ -259,38 +237,38 @@ public class mapDash : MonoBehaviour
     }
     private void resetVariables()
     {
-        mapPanelEnabled = false;
-        stateControl = false;
-        currentSelectedX = -1;
-        currentSelectedY = -1;
+        panel_enabled = false;
+        state_control = false;
+        current_selected_x = -1;
+        current_selected_y = -1;
     }
     public void resetMapColor()
     {
         refreshMapSquareDoors();
-        for (int i = 0; i < mapSquareCollection.Count; i++)
+        for (int i = 0; i < map_square_collection.Count; i++)
         {
-            for (int k = 0; k < mapSquareCollection[i].Count; k++)
+            for (int k = 0; k < map_square_collection[i].Count; k++)
             {
-                var square = mapSquareCollection[i][k].GetComponent<mapSquare>();
-                square.state = evnetCenter.getFlagBool("Area " + square.selfRef.name);
+                var square = map_square_collection[i][k].GetComponent<mapSquare>();
+                square.state = event_center.getFlagBool(ODMVariable.convert.getAreaFlag(square.selfRef.name));
 
                 square.setColor();
 
-                if (currentLevelMap != null)
+                if (current_level_map != null)
                 {
-                    if (mapSquareCollection[i][k].name.Equals(currentLevelMap.name))
+                    if (map_square_collection[i][k].name.Equals(current_level_map.name))
                     {
-                        mapSquareCollection[i][k].GetComponent<mapSquare>().setCurrent();
+                        map_square_collection[i][k].GetComponent<mapSquare>().setCurrent();
                     }
                 }
             }
         }
-        if (currentSelectedX != -1 && currentSelectedY != -1)
-            mapSquareCollection[currentSelectedY][currentSelectedX].GetComponent<mapSquare>().setSelected();
+        if (current_selected_x != -1 && current_selected_y != -1)
+            map_square_collection[current_selected_y][current_selected_x].GetComponent<mapSquare>().setSelected();
     }
     private void showSelectedMapInfo()
     {
         txtMapInfoCurrentSelected.GetComponent<Text>().text =
-            mapSquareCollection[currentSelectedY][currentSelectedX].GetComponent<mapSquare>().showInfo();
+            map_square_collection[current_selected_y][current_selected_x].GetComponent<mapSquare>().showInfo();
     }
 }
