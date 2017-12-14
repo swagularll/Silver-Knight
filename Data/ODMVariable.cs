@@ -554,6 +554,9 @@ public class ODMVariable
         public static string sure_drop_item = "sure drop item";
         public static string cannot_drop_item = "cannot drop item";
         public static string cannot_collect = "cannot collect";
+
+        public static string press_to_use = "cannot collect";
+
     }
 
     public static class warmbug

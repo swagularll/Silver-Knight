@@ -134,7 +134,7 @@ public class menuManager : MonoBehaviour
         GetComponent<mapDash>().preSetting();
         GetComponent<documentDash>().preSetting();
         GetComponent<intelligenceDash>().preSetting();
-        GetComponent<inventoryDash>().refreshItemStatus();
+        GetComponent<inventoryDash>().refreshStatus();
     }
 
     public void closeMenu()

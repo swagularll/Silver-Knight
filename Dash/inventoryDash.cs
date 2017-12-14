@@ -15,9 +15,9 @@ public class inventoryDash : MonoBehaviour
     //renew code
     //For instance
     public GameObject slot;//ui img from Prefabs
-    public GameObject itemImage;//ui img from Prefabs
-    public GameObject txtStock;
-    public GameObject itemNameTag;
+    public GameObject item_image;//ui img from Prefabs
+    public GameObject txt_amount;
+    public GameObject item_name_tag;
     public GameObject txtPageCount;
 
     //For instance
@@ -33,15 +33,19 @@ public class inventoryDash : MonoBehaviour
     public GameObject inventory_selected_item_a;
     public GameObject inventory_selected_item_b;
 
-
-
     public GameObject text_inventory_description;
     public GameObject item_title;
-    public GameObject text_press_to_use;
+
+    public GameObject text_message_description;
+    public GameObject message_title;
+
+    public GameObject text_item_hint;
 
     //Description Area
     public GameObject inventory_description_area;
     public GameObject inventory_modification_description_area;
+    public GameObject inventory_message_description_area;
+
 
     //Modification buttion control panel
     public GameObject inventory_item_modification_panel;
@@ -49,15 +53,9 @@ public class inventoryDash : MonoBehaviour
     public List<item> inventory_collection;
     public List<GameObject> slot_collection;
 
-    private item selected_combine_item_a;
-    private item selected_combine_item_b;
+    private item temp_selected_combine_item_a;
+    private item temp_selected_combine_item_b;
 
-
-    //renew code
-    //private string img_item_background = "UI/[UI]Harf Transparent Side B Full";
-    //private string img_item_background_selected = "UI/[UI]Item Selection";
-    //public Sprite img_item_background;
-    //public Sprite img_item_background_selected;
     public Sprite no_item_image;
 
     private AudioSource aud;
@@ -69,8 +67,8 @@ public class inventoryDash : MonoBehaviour
     private int current_page = 1;
     private int page_max = 2;
 
-    private int primary_item_index;//For combine item
-    private int last_added_item_index;
+    private int temp_in_selection_index;//For combine item
+    private int temp_last_added_item_index;
 
     private string on_reply_use_item = "confirmUseItem";
     private string on_reply_drop_item = "confirmDropItem";
@@ -78,12 +76,15 @@ public class inventoryDash : MonoBehaviour
     private PlayMakerFSM item_modification_fsm;
 
     private bool state_control = false;//for first time selection control
-    private bool state_control_combine_item = false;//for first time selection control
+    private bool state_control_combine_item = false;
+    private bool state_control_modify_item = false;
 
     public bool panel_enabled = false; //inventory interacterable
     private bool is_modifying_item = false; //check panel interacterable
     private bool is_combining_item = false; //check panel interacterable
-    
+    private bool is_on_confirm_hold = false;
+    private bool is_on_message_hold = false;
+
 
     #region Initilization
     void Awake()
@@ -100,19 +101,20 @@ public class inventoryDash : MonoBehaviour
 
         for (int i = 0; i < slot_count; i++)
         {
-            GameObject newSlot = Instantiate(slot);
-            GameObject newItemImage = Instantiate(itemImage);
-            GameObject newStock = Instantiate(txtStock);
-            GameObject newTag = Instantiate(itemNameTag);
+            GameObject new_slot = Instantiate(slot);
+            GameObject new_item_image = Instantiate(item_image);
+            GameObject new_stock = Instantiate(txt_amount);
+            GameObject new_tag = Instantiate(item_name_tag);
 
-            setAlphaZero(ref newItemImage);
-            newStock.transform.GetComponent<Text>().text = "";
-            newTag.transform.GetComponent<Text>().text = "";
-            newStock.transform.SetParent(newItemImage.transform);
-            newItemImage.transform.SetParent(newSlot.transform);
-            newTag.transform.SetParent(newSlot.transform);
-            //newTag> newSlot>newItemImage > newStock
-            slot_collection.Add(newSlot);
+            //newTag > newSlot>newItemImage > newStock
+
+            ODM.graphic.setInvisiableAlpha(ref new_item_image);
+            new_stock.transform.GetComponent<Text>().text = "";
+            new_tag.transform.GetComponent<Text>().text = "";
+            new_stock.transform.SetParent(new_item_image.transform);
+            new_item_image.transform.SetParent(new_slot.transform);
+            new_tag.transform.SetParent(new_slot.transform);
+            slot_collection.Add(new_slot);
             slot_collection[i].transform.SetParent(InventoryPanel.transform);
         }
     }
@@ -121,8 +123,7 @@ public class inventoryDash : MonoBehaviour
         item_modification_fsm = fsmHelper.getFsm(inventory_item_modification_panel, fsm_name_item_modification);
 
         updatePage();
-        refreshItemStatus();
-        displayItem();
+        refreshStatus();
 
         //New game starting equipments
         if (ODMVariable.create_new_save)
@@ -140,55 +141,46 @@ public class inventoryDash : MonoBehaviour
     #endregion
 
     #region Panel Control
+
+
+
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            sortItem(0, 8);
-        }
-        //select first item and display
         if (panel_enabled && !state_control)
         {
             aud.clip = Resources.Load<AudioClip>(audioResource.electrical);
             aud.Play();
             state_control = true;//for the first time loading
-            displayItem();
+            refreshStatus();
         }
         else if (panel_enabled && state_control && !ODMVariable.is_system_locked)//When the select function is enabled...
         {
             if (Input.GetKeyDown(KeyCode.C))//Use a item
             {
-                if (!is_modifying_item)
+                hideDescription();
+
+                if (!state_control_modify_item)
+                {
+                    state_control_modify_item = true;
+                }
+                else 
+                if(!is_modifying_item)
                 {
                     startModifyItem();
                 }
                 else if (!state_control_combine_item && is_combining_item)
                 {
                     state_control_combine_item = true;
-                    Debug.Log("start combining item");
                 }
                 else if (state_control_combine_item && is_combining_item)
                 {
                     tryCombineItem();
-                    Debug.Log("try to combine item a with item b");
-                }
-                else
-                {
-                    Debug.Log("Nothing do to...");
                 }
             }
             if (Input.GetKeyDown(KeyCode.X))
             {
 
-                if (is_combining_item)
-                {
-                    endCombineItem();
-                }
-                else if (is_modifying_item)
-                {
-                    endModifyItem();
-                }
-                else
+                if (!is_combining_item && is_modifying_item)
                 {
                     closePanel();
                 }
@@ -196,17 +188,18 @@ public class inventoryDash : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
+                hideDescription();
+
                 if (convertToSlotIndex() == slot_count - 1)
                 {
                     aud.clip = Resources.Load<AudioClip>(audioResource.selection_negative);
-                    displayItem();
-
+                    refreshStatus();
                 }
                 else//select next item
                 {
                     aud.clip = Resources.Load<AudioClip>(audioResource.selection_switch);
                     current_index++;
-                    displayItem();
+                    refreshStatus();
                 }
                 aud.Play();
             }
@@ -214,6 +207,8 @@ public class inventoryDash : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
+                hideDescription();
+
                 if (convertToSlotIndex() == 0)
                 {
                     closePanel();
@@ -223,12 +218,14 @@ public class inventoryDash : MonoBehaviour
                     aud.clip = Resources.Load<AudioClip>(audioResource.selection_switch);
                     aud.Play();
                     current_index--;
-                    displayItem();
+                    refreshStatus();
                 }
             }
 
             if (Input.GetKeyDown(KeyCode.RightArrow))
             {
+                hideDescription();
+
                 if (current_page == page_max)
                 {
                     aud.clip = Resources.Load<AudioClip>(audioResource.selection_negative);
@@ -244,6 +241,8 @@ public class inventoryDash : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
+                hideDescription();
+
                 if (current_page == 1)
                 {
                     aud.clip = Resources.Load<AudioClip>(audioResource.selection_negative);
@@ -254,6 +253,19 @@ public class inventoryDash : MonoBehaviour
                     previousPage();
                 }
                 aud.Play();
+            }
+
+        }
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            hideDescription();
+
+            if (!is_on_confirm_hold && state_control && !ODMVariable.is_system_locked)
+            {
+                if (is_modifying_item)
+                {
+                    stopModifyItem(true);
+                }
             }
         }
     }
@@ -268,39 +280,30 @@ public class inventoryDash : MonoBehaviour
             panel_enabled = false;
             is_modifying_item = true;
 
-            inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
-            inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true );
-
-            //Set panel
-            inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 0;
-            inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 1;
-
             //Clear data
             clearCombineItems();
 
             //Send events
-            inventory_item_modification_panel.SendMessage(eventName.system.show_gui);
             item_modification_fsm.SendEvent(eventName.show_menu);
+            refreshStatus();
         }
     }
-    public void endModifyItem()
+    public void stopModifyItem(bool _play_sound)
     {
-        panel_enabled = true;
-        is_modifying_item = false;
-        inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
-        inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
-
-        //Set panel
-        inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 1;
-        inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 0;
-
-        inventory_item_modification_panel.SendMessage(eventName.system.show_gui);
+        //End sub tasks
         clearCombineItems();
-        item_modification_fsm.SendEvent(eventName.hide_menu);
+        panel_enabled = true;
+        state_control_combine_item = is_combining_item = is_modifying_item = false;
+        if (_play_sound)
+            item_modification_fsm.SendEvent(eventName.hide_menu);
+        else
+            item_modification_fsm.SendEvent(eventName.end_function);
+        refreshStatus();
     }
 
     private void useItemConfirmationCheck()//Using item intro function
     {
+        is_on_confirm_hold = true;
         string msg = dataWidget.getTranslaton(ODMVariable.translation.trans_use_item_confirm, inventory_collection[current_index].title);
 
         //Set special message for particular items
@@ -316,6 +319,7 @@ public class inventoryDash : MonoBehaviour
     //CORE FUNCTION
     public void confirmUseItem(bool _result)
     {
+        is_on_confirm_hold = false;
         if (_result)//Player confirmed to use item
         {
             GameObject targetDoor = ODMObject.current_activate_door;
@@ -396,69 +400,74 @@ public class inventoryDash : MonoBehaviour
         else
         {
             //Player decided not to use a item
-            stopUsingItem();
+            state_control_modify_item = false;
+            stopModifyItem(true);
         }
     }
-    private void stopUsingItem()
-    {
-        panel_enabled = true;
-        item_modification_fsm.SendEvent(eventName.back);
-    }
+    //private void stopUsingItem()
+    //{
+    //    stopModifyItem(false);
+    //}
+
     public void startCombineItem()
     {
+        aud.clip = Resources.Load<AudioClip>(audioResource.electrical);
+        aud.Play();
         panel_enabled = is_combining_item = true;
-        inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
-        inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
-
-        selected_combine_item_a = inventory_collection[current_index];
-        primary_item_index = current_index;
+        temp_selected_combine_item_a = inventory_collection[current_index];
+        temp_in_selection_index = current_index;
         inventory_selected_item_a.GetComponent<Image>().sprite = inventory_collection[current_index].sprite;
+        refreshStatus();
+
         //FSM show combine message
     }
-    public void endCombineItem()
-    {
-        panel_enabled = is_combining_item = false;
-        
-        item_modification_fsm.SendEvent(eventName.back);
-        //FSM hide combine message
-    }
+    //public void stopCombineItem(bool _play_sound)
+    //{
+    //    if (_play_sound)
+    //    {
+    //        aud.clip = Resources.Load<AudioClip>(audioResource.electrical_out);
+    //        aud.Play();
+    //    }
+
+    //    panel_enabled = is_combining_item = false;
+    //    clearCombineItems();
+    //    item_modification_fsm.SendEvent(eventName.back);
+    //    refreshStatus();
+    //}
     public void tryCombineItem()
     {
-        //Previous stage*****X
         if (inventory_collection[current_index].id == -1)
         {
-            //No item
             aud.clip = Resources.Load<AudioClip>(audioResource.wooden_fish);
+            aud.Play();
         }
-        else if (inventory_collection[current_index].id == selected_combine_item_a.id)
+        else if (inventory_collection[current_index].id == temp_selected_combine_item_a.id)
         {
-            aud.clip = Resources.Load<AudioClip>(audioResource.selection_negative);
+            aud.clip = Resources.Load<AudioClip>(audioResource.wooden_fish);
+            aud.Play();
         }
         else
         {
-            selected_combine_item_b = inventory_collection[current_index];
-            if (selected_combine_item_a == selected_combine_item_b)//Player trying to combine same item
+            temp_selected_combine_item_b = inventory_collection[current_index];
+
+            bool result = combineItem();
+            if (result)
             {
-                ODMObject.message_display_panel.GetComponent<messagePanel>().showMessage(ODMVariable.translation.item_connot_use);
+                //Successfully combined item
+                aud.clip = Resources.Load<AudioClip>(audioResource.get_item);
+                aud.Play();
+                showDescription(ODMVariable.translation.auto_save, ODMVariable.translation.auto_save);
             }
             else
             {
-                bool result = combineItem();
-                if (result)
-                {
+                aud.clip = Resources.Load<AudioClip>(audioResource.electrical_out);
+                aud.Play();
 
-                    //Successfully combined item
-                    ODMObject.message_display_panel.GetComponent<messagePanel>().showMessage(ODMVariable.translation.confirm);
-                }
-                else
-                {
-                    //Show fail to combine item message
-                    ODMObject.message_display_panel.GetComponent<messagePanel>().showMessage(ODMVariable.translation.cancel);
-                }
+                //Show fail to combine item message
+                showDescription(ODMVariable.translation.auto_save, ODMVariable.translation.auto_save);
             }
-            refreshItemStatus();
-            displayItem();
-            endModifyItem();
+            state_control_combine_item = false;
+            stopModifyItem(false);
         }
     }
 
@@ -495,16 +504,14 @@ public class inventoryDash : MonoBehaviour
             }
 
         }
-        refreshItemStatus();
-        displayItem();
+        refreshStatus();
     }
 
     public bool combineItem()
     {
-        //XXX check if item cannot be combined
         bool result = false;
 
-        string[] combination_list = selected_combine_item_a.combination.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] combination_list = temp_selected_combine_item_a.combination.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
         for (int i = 0; i < combination_list.Length; i++)
         {
@@ -514,10 +521,10 @@ public class inventoryDash : MonoBehaviour
                 int item_b_id = Int32.Parse(comb[0]);
                 int item_output_id = Int32.Parse(comb[1]);
 
-                if (item_b_id == selected_combine_item_b.id)
+                if (item_b_id == temp_selected_combine_item_b.id)
                 {
-                    checkAndTakeAway(selected_combine_item_a.id);
-                    checkAndTakeAway(selected_combine_item_b.id);
+                    checkAndTakeAway(temp_selected_combine_item_a.id);
+                    checkAndTakeAway(temp_selected_combine_item_b.id);
                     addItem(item_output_id);
                     result = true;
                     break;
@@ -531,19 +538,21 @@ public class inventoryDash : MonoBehaviour
         }
         if (result)
         {
-            sortItem(last_added_item_index, primary_item_index);
-            current_index = primary_item_index;
+            sortItem(temp_last_added_item_index, temp_in_selection_index);
+            current_index = temp_in_selection_index;
         }
         return result;
     }
 
     public void clearCombineItems()
     {
-        selected_combine_item_a = null;
-        selected_combine_item_b = null;
+        temp_selected_combine_item_a = null;
+        temp_selected_combine_item_b = null;
     }
     private void dropItemConfirmationCheck()//Using item intro function
     {
+        is_on_confirm_hold = true;
+
         if (inventory_collection[current_index].id != -1)
         {
             panel_enabled = false;
@@ -553,6 +562,8 @@ public class inventoryDash : MonoBehaviour
     }
     public void confirmDropItem(bool _result)
     {
+        is_on_confirm_hold = false;
+
         if (_result)
         {
             itemManager item_manager = GetComponent<itemManager>();
@@ -562,16 +573,13 @@ public class inventoryDash : MonoBehaviour
         }
         else
         {
-            item_modification_fsm.SendEvent(eventName.back);
+            state_control_modify_item = false;
+            stopModifyItem(true);
+            //item_modification_fsm.SendEvent(eventName.back);
         }
     }
 
-    public void stopDropItem()
-    {
-        itemManager item_manager = GetComponent<itemManager>();
-        item_manager.createItem(inventory_collection[current_index].id.ToString());
-    }
-
+    //XXX
     public void useSerum()
     {
         checkAndTakeAway((int)ODMVariable.itemCatalogue.creature_serum);
@@ -641,7 +649,7 @@ public class inventoryDash : MonoBehaviour
             {
                 if (inventory_collection[i].id == -1)//means empty slot
                 {
-                    last_added_item_index = i;
+                    temp_last_added_item_index = i;
                     inventory_collection[i] = itemToAdd;//put selected item into collection
                     break;
                 }
@@ -756,9 +764,7 @@ public class inventoryDash : MonoBehaviour
         current_page++;
         current_index += slot_count;
         updatePage();
-        refreshItemStatus();
-        displayItem();
-        showSlotColor();
+        refreshStatus();
     }
 
     private void previousPage()
@@ -766,21 +772,16 @@ public class inventoryDash : MonoBehaviour
         current_page--;
         current_index -= slot_count;
         updatePage();
-        refreshItemStatus();
-        displayItem();
-        showSlotColor();
+        refreshStatus();
     }
 
     public void openPanel()
     {
-        //play sound
-        panel_enabled = true;
+        state_control_modify_item = panel_enabled = true;
         inventory_item_modification_panel.SendMessage(eventName.system.hide_gui);
 
         current_index = 0;
-        setDefaultLayout();
-        refreshItemStatus();
-        displayItem();
+        refreshStatus();
     }
 
     public void closePanel()
@@ -794,19 +795,9 @@ public class inventoryDash : MonoBehaviour
         ODMObject.confirmation_panel.GetComponent<confirmPanel>().quitPanel();
         item_modification_fsm.SendEvent(eventName.hide_menu);
 
-        setDefaultLayout();
         resetVariables();
-        refreshItemStatus();
-        displayItem();
-        showSlotColor();
+        refreshStatus();
     }
-
-    public void setDefaultLayout()
-    {
-        inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
-        inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
-    }
-
     #endregion
 
     #region Display
@@ -814,8 +805,99 @@ public class inventoryDash : MonoBehaviour
     {
         txtPageCount.GetComponent<Text>().text = current_page + "/" + page_max;
     }
-    public void refreshItemStatus()
+    private void showDescription(string _title_trans_key, string _msg_trans_key)
     {
+        is_on_message_hold = true;
+        message_title.GetComponent<Text>().text = dataWidget.getTranslaton(_title_trans_key);
+        text_message_description.GetComponent<Text>().text = dataWidget.getTranslaton(_msg_trans_key);
+    }
+
+    private void hideDescription()
+    {
+        is_on_message_hold = false;
+        inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+    }
+
+    public void refreshStatus()
+    {
+        #region Panel Visibility
+        if (is_on_message_hold)
+        {
+            inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+            inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+            inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
+
+            //Up Panel
+            inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 1;
+            inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 0;
+        }
+        else if (is_combining_item)
+        {
+            inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
+            inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+            inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+
+            //Up Panel
+            inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 0;
+            inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 1;
+
+            //showDescription(ODMVariable.translation.accessible, ODMVariable.translation.auto_save);//EEE
+        }
+        else if (is_modifying_item)
+        {
+            inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+            inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
+            inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+
+            //Up Panel
+            inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 1;
+            inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 0;
+            inventory_item_modification_panel.GetComponent<CanvasGroup>().alpha = 1;
+            text_item_hint.GetComponent<Text>().text = "";//EEE
+        }
+        else
+        {
+            if (current_index != -1)
+            {
+                inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
+            }
+            else
+            {
+                inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+            }
+            inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+            inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 1;
+            inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 0;
+            inventory_item_modification_panel.GetComponent<CanvasGroup>().alpha = 0;
+            //showDescription(ODMVariable.translation.press_to_use, ODMVariable.translation.auto_save);
+        }
+        #endregion
+
+        #region Slot Display
+        for (int i = 0; i < slot_count; i++)
+        {
+            if (convertToSlotIndex() == i)
+            {
+                slot_collection[i].GetComponent<Animator>().SetBool(ODMVariable.animation.is_selected, true);
+            }
+            else
+            {
+                slot_collection[i].GetComponent<Animator>().SetBool(ODMVariable.animation.is_selected, false);
+
+            }
+            if (is_combining_item && convertToSlotIndex() != i &&
+                inventory_collection[(current_page - 1) * slot_count + i % slot_count].id == temp_selected_combine_item_a.id)
+            {
+                slot_collection[i].GetComponent<Animator>().SetBool(ODMVariable.animation.is_selectable, false);
+            }
+            else
+            {
+                slot_collection[i].GetComponent<Animator>().SetBool(ODMVariable.animation.is_selectable, true);
+            }
+        }
+        #endregion
+
+        #region Item Description
         for (int i = 0; i < slot_count; i++)
         {
             item item = inventory_collection[(current_page - 1) * slot_count + i];
@@ -823,7 +905,7 @@ public class inventoryDash : MonoBehaviour
             if (item.id == -1)
             {
                 GameObject itemImage = slot_collection[i].transform.GetChild(0).gameObject;
-                setAlphaZero(ref itemImage);
+                ODM.graphic.setInvisiableAlpha(ref itemImage);
                 slot_collection[i].transform.GetChild(0).transform.GetChild(0).GetComponent<Text>().text = "";
                 slot_collection[i].transform.GetChild(1).GetComponent<Text>().text = "";
             }
@@ -831,7 +913,7 @@ public class inventoryDash : MonoBehaviour
             {
                 GameObject itemImage = slot_collection[i].transform.GetChild(0).gameObject;
                 itemImage.GetComponent<Image>().sprite = item.sprite;
-                setAlphaOne(ref itemImage);
+                ODM.graphic.setVisiableAlpha(ref itemImage);
                 if (item.stackable)
                 {
                     slot_collection[i].transform.GetChild(0).GetChild(0).GetComponent<Text>().text = item.amount.ToString();
@@ -843,120 +925,69 @@ public class inventoryDash : MonoBehaviour
                 slot_collection[i].transform.GetChild(1).GetComponent<Text>().text = item.shortName;
             }
         }
-    }
-    private void displayItem()
-    {
-        //setting slot background to selected
+        #endregion
 
+        #region Item Image Display
         if (current_index == -1 || inventory_collection[current_index].id == -1)
         {
-            showNoItem();
-        }
-        else
-        {
-            showItem();
-        }
-        showSlotColor();
-    }
+            #region Show No Item
 
-    private void showSlotColor()
-    {
-        for (int i = 0; i < slot_count; i++)
-        {
-            if (convertToSlotIndex() == i)
+            if (is_combining_item)
             {
-                slot_collection[i].GetComponent<Animator>().SetBool(ODMVariable.animation.is_selected, true);
-                slot_collection[i].GetComponent<Animator>().SetBool(ODMVariable.animation.is_selectable, true);
+                //Panel switch
+                inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 0;
+                inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 1;
+
+                //Show image
+                inventory_selected_item_b.GetComponent<Image>().sprite = no_item_image;
+
             }
             else
             {
-                if (current_index != -1 && selected_combine_item_a != null)
-                {
-                    if (inventory_collection[(current_page - 1) * slot_count + i % slot_count].id == selected_combine_item_a.id)
-                    {
-                        slot_collection[i].GetComponent<Animator>().SetBool(ODMVariable.animation.is_selectable, false);
-                    }
-                    else
-                    {
-                        slot_collection[i].GetComponent<Animator>().SetBool(ODMVariable.animation.is_selectable, true);
-                    }
-                }
-                slot_collection[i].GetComponent<Animator>().SetBool(ODMVariable.animation.is_selected, false);
+                //Panel switch
+                inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 1;
+                inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 0;
+
+                //Show image
+                inventory_no_item_image.GetComponent<CanvasGroup>().alpha = 1;
+                inventory_selected_item_main.GetComponent<CanvasGroup>().alpha = 0;
             }
-        }
-    }
 
-    private void showNoItem()
-    {
-        //Show hint
-        text_press_to_use.GetComponent<CanvasGroup>().alpha = 1;
-
-        if (is_combining_item)
-        {
-            //Panel switch
-            inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 0;
-            inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 1;
-
-            //Show image
-            inventory_selected_item_b.GetComponent<Image>().sprite = no_item_image;
-
+            item_title.GetComponent<Text>().text = "";
+            text_item_hint.GetComponent<CanvasGroup>().alpha = 0;
+            #endregion
         }
         else
         {
-            //Panel switch
-            inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 1;
-            inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 0;
+            #region Show Item
+            //Show hint
+            text_item_hint.GetComponent<CanvasGroup>().alpha = 1;
 
-            //Show image
-            inventory_no_item_image.GetComponent<CanvasGroup>().alpha = 1;
+            if (is_combining_item)
+            {
+                //Show image
+                inventory_selected_item_b.GetComponent<Image>().sprite = inventory_collection[current_index].sprite;
+            }
+            else
+            {
+                //Panel switch
+                inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 1;
+                inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 0;
+
+                //Show image
+                inventory_no_item_image.GetComponent<CanvasGroup>().alpha = 0;
+                inventory_selected_item_main.GetComponent<CanvasGroup>().alpha = 1;
+                inventory_selected_item_main.GetComponent<Image>().sprite = inventory_collection[current_index].sprite;
+            }
+
+            //Description Area
+            item_title.GetComponent<Text>().text = inventory_collection[current_index].title;
+            text_inventory_description.GetComponent<Text>().text = inventory_collection[current_index].description;
+            #endregion
         }
-
-        inventory_description_area.GetComponent<Menu>().isOpen = false;
-        item_title.GetComponent<Text>().text = "";
-        text_press_to_use.GetComponent<CanvasGroup>().alpha = 0;
+        #endregion
     }
 
-    private void showItem()
-    {
-        //Show hint
-        text_press_to_use.GetComponent<CanvasGroup>().alpha = 1;
-
-        if (is_combining_item)
-        {
-
-
-            //Show image
-            inventory_selected_item_b.GetComponent<Image>().sprite = inventory_collection[current_index].sprite;
-        }
-        else
-        {
-            //Panel switch
-            inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 1;
-            inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 0;
-
-            //Show image
-            inventory_no_item_image.GetComponent<CanvasGroup>().alpha = 0;
-            inventory_selected_item_main.GetComponent<Image>().sprite = inventory_collection[current_index].sprite;
-        }
-
-        //Description Area
-        inventory_description_area.GetComponent<Menu>().isOpen = true;
-        text_inventory_description.GetComponent<Text>().text = inventory_collection[current_index].description;
-        item_title.GetComponent<Text>().text = inventory_collection[current_index].title;
-    }
-    private void setAlphaZero(ref GameObject obj)
-    {
-        Color c = obj.transform.GetComponent<Image>().color;
-        c.a = 0;
-        obj.transform.GetComponent<Image>().color = c;
-    }
-
-    private void setAlphaOne(ref GameObject obj)
-    {
-        Color c = obj.transform.GetComponent<Image>().color;
-        c.a = 1f;
-        obj.transform.GetComponent<Image>().color = c;
-    }
     #endregion
 
     #region Data Manipulation
@@ -992,6 +1023,7 @@ public class inventoryDash : MonoBehaviour
     {
         current_page = 1;
         current_index = -1;
+        clearCombineItems();
         updatePage();
     }
     #endregion
@@ -999,19 +1031,19 @@ public class inventoryDash : MonoBehaviour
     //renew code
     public void getItemNameByReturn(string _pack)
     {
-        ODM.errorLog(transform.name, "TRIGGERED UNSURE EVENT!");
-        //string[] data = _pack.Split(',');//objName, fsmName, docKey
-        //item _item = itemDB.getItem(Int32.Parse(data[2].Replace("\r", "")));
-        //if (_item != null)
-        //{
-        //    if (String.IsNullOrEmpty(_item.title))
-        //        ODM.errorLog(transform.name,"getDocumentName Error. Key =" + _pack,);
-        //    else
-        //    {
-        //        fsmHelper fsmHelper = new fsmHelper();
-        //        PlayMakerFSM f = fsmHelper.getFsm(data[0], data[1]);
-        //        f.FsmVariables.GetFsmString("slot item name").Value = _item.title;
-        //    }
-        //}
+        ODM.errorLog(transform.name, "SPECIAL METHOD CALLED! getItemNameByReturn!");
+        string[] data = _pack.Split(',');//objName, fsmName, docKey
+        item _item = GetComponent<ItemDatabase>().getItem(Int32.Parse(data[2].Replace("\r", "")));
+        if (_item != null)
+        {
+            if (String.IsNullOrEmpty(_item.title))
+                ODM.errorLog(transform.name, "getDocumentName Error. Key =" + _pack);
+            else
+            {
+                fsmHelper fsmHelper = new fsmHelper();
+                PlayMakerFSM f = fsmHelper.getFsm(data[0], data[1]);
+                f.FsmVariables.GetFsmString("slot item name").Value = _item.title;
+            }
+        }
     }
 }

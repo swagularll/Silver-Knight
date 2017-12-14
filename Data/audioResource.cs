@@ -13,4 +13,7 @@ public static class audioResource
     public static string negative_small = "Sound/[00]Components/Buttons/[Click switch][bubaproducer]button-1";
     public static string typer_switch = "Sound/[00]Components/Buttons/[Typer][7778]button-2";
     public static string wooden_fish = "Sound/[00]Components/Buttons/[Wooden Fish][bubaproducer]button-27";
+    public static string get_item = "Sound/[00]Components/Buttons/[Get Item][RutgerMuller]telephone-placed-in-dock-beep";
+
+    
 }

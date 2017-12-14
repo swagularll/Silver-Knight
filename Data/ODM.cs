@@ -8,6 +8,7 @@ using HutongGames.PlayMaker;
 using System;
 using System.Text;
 using System.Security.Cryptography;
+using UnityEngine.UI;
 
 public class ODM
 {
@@ -130,6 +131,25 @@ public class ODM
 
     #endregion
 
+    #region GUI DISPLAY
+    public static class graphic
+    {
+        public static void setInvisiableAlpha(ref GameObject obj)
+        {
+            Color c = obj.transform.GetComponent<Image>().color;
+            c.a = 0;
+            obj.transform.GetComponent<Image>().color = c;
+        }
+
+        public static void setVisiableAlpha(ref GameObject obj)
+        {
+            Color c = obj.transform.GetComponent<Image>().color;
+            c.a = 1f;
+            obj.transform.GetComponent<Image>().color = c;
+        }
+    }
+    #endregion
+
     #region ENCRYPTION
     static string key = "WarmbugFuckAvaLibertyveryhard666";
 
@@ -176,7 +196,7 @@ public class ODM
         }
         catch (Exception ex)
         {
-            ODM.errorLog("Static", "Decryption error: " +  ex.ToString());
+            ODM.errorLog("Static", "Decryption error: " + ex.ToString());
         }
 
         return result;
