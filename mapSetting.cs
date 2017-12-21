@@ -32,9 +32,6 @@ public class mapSetting : MonoBehaviour
 
     void Start()
     {
-       
-        requiredItem = ODMVariable.itemCatalogue.none;
-
         eventManager = ODMObject.event_manager;
 
         nextSceneName = setLocationString();

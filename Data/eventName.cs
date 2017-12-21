@@ -39,6 +39,8 @@ public class eventName
     public static string end_hold = "end hold";
     public static string start_menu_hold = "start menu hold";
     public static string end_menu_hold = "end menu hold";
+    public static string end_system_hold = "end system hold";//no start system hold required, variable only
+
 
     //Dialog / Inventory Dash
     public static string start_function = "start function";
@@ -99,7 +101,9 @@ public class eventName
         public static string hide_gui = "hideGUI";
         public static string show_gui = "showGUI";
 
+        public static string self_register = "selfRegister";
 
+        
     }
 
 }

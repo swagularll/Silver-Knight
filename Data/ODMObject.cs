@@ -159,6 +159,18 @@ public static class ODMObject
             FsmVariables.GlobalVariables.GetFsmGameObject("currentActivateDoor").Value = value;
         }
     }
+    public static GameObject current_activate_box
+    {
+        get
+        {
+            return FsmVariables.GlobalVariables.GetFsmGameObject("currentActivateBox").Value;
+        }
+
+        set
+        {
+            FsmVariables.GlobalVariables.GetFsmGameObject("currentActivateBox").Value = value;
+        }
+    }
     public static GameObject current_event_object
     {
         get

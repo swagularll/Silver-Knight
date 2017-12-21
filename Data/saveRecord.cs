@@ -14,6 +14,7 @@ public class saveRecord
     public diaryLog diary_log { get; set; }
     public ODM.ODMDictionary lair_info_collection { get; set; }
     public List<itemSetting.sceneItemInfo> item_collection { get; set; }
+    public ODM.ODMDictionary scene_info_colleciton { get; set; }
 
     public saveRecord()
     {
@@ -24,6 +25,7 @@ public class saveRecord
         this.diary_log = new diaryLog();
         this.lair_info_collection = new ODM.ODMDictionary();
         this.item_collection = new List<itemSetting.sceneItemInfo>();
+        this.scene_info_colleciton = new ODM.ODMDictionary();
     }
     public saveRecord(string json_string)
     {
@@ -34,10 +36,11 @@ public class saveRecord
         this.diary_log = new diaryLog(dic.getValue("diary_log"));
         this.lair_info_collection = new ODM.ODMDictionary(dic.getValue("lair_info_collection"));
         this.item_collection = JsonMapper.ToObject<List<itemSetting.sceneItemInfo>>(dic.getValue("item_collection"));
+        this.scene_info_colleciton = new ODM.ODMDictionary(dic.getValue("scene_info_colleciton"));
     }
 
     public saveRecord(string _id, ODM.ODMDictionary _save_data, ODM.ODMDictionary _flag_collection,
-        diaryLog _diary_log, ODM.ODMDictionary _lair_info_collection, List<itemSetting.sceneItemInfo> _item_collection)
+        diaryLog _diary_log, ODM.ODMDictionary _lair_info_collection, List<itemSetting.sceneItemInfo> _item_collection, ODM.ODMDictionary _scene_info_colleciton)
     {
         this.id = _id;
         this.save_data = _save_data;
@@ -45,6 +48,7 @@ public class saveRecord
         this.diary_log = _diary_log;
         this.lair_info_collection = _lair_info_collection;
         this.item_collection = _item_collection;
+        this.scene_info_colleciton = _scene_info_colleciton;
     }
 
     public void saveProgress(saveRecord _save)
@@ -58,6 +62,7 @@ public class saveRecord
         dic.add("diary_log", _save.diary_log.getJsonString());
         dic.add("lair_info_collection", _save.lair_info_collection.getJsonString());
         dic.add("item_collection", JsonMapper.ToJson(_save.item_collection));
+        dic.add("scene_info_colleciton", _save.scene_info_colleciton.getJsonString());
         sw.Write(dic.getJsonString());
         sw.Close();
     }
@@ -80,7 +85,6 @@ public class saveRecord
         else
         {
             StreamReader sr = new StreamReader(ODMVariable.path.save_folder_directory + @"\" + player_code + ".json", Encoding.Default);
-            //ODM.ODMDictionary dic = JsonMapper.ToObject<ODM.ODMDictionary>(sr.ReadToEnd());
             saveRecord save_record_instance = new saveRecord(sr.ReadToEnd());
             sr.Close();
             return save_record_instance;

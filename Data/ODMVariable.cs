@@ -34,12 +34,12 @@ public class ODMVariable
         set
         { FsmVariables.GlobalVariables.GetFsmFloat("moveSpeed").Value = value; }
     }
-    public static int ava_direction
+    public static float ava_direction
     {
         get
-        { return FsmVariables.GlobalVariables.GetFsmInt("ava_direction").Value; }
+        { return FsmVariables.GlobalVariables.GetFsmFloat("ava_direction").Value; }
         set
-        { FsmVariables.GlobalVariables.GetFsmInt("ava_direction").Value = value; }
+        { FsmVariables.GlobalVariables.GetFsmFloat("ava_direction").Value = value; }
     }
     public static float ava_current_poison
     {
@@ -245,6 +245,12 @@ public class ODMVariable
         {
             return _level_name + " Right Door";
         }
+
+        public static string getSceneIdentifier(string _level_name,string _identifier)
+        {
+            return _level_name + " " + _identifier;
+        }
+
     }
 
     public static class fsm
@@ -340,7 +346,7 @@ public class ODMVariable
         //Door Sprite
         public static string left_door_locked = "Background/Left Door Locked";
         public static string left_door_unlocked = "Background/Left Door Unlocked";
-        
+
         public static string right_door_locked = "Background/Right Door Locked";
         public static string right_door_unlocked = "Background/Right Door Unlocked";
 
@@ -363,7 +369,7 @@ public class ODMVariable
         //Confirm panel
         public static string response = "response";
 
-        //
+        //Common
         public static string flag_name = "flag_name";
         public static string fsm_name = "fsm_name";
         public static string self = "self";
@@ -379,6 +385,10 @@ public class ODMVariable
 
         //BGM Manager
         public static string is_default = "isDefault";
+
+        //For bullet
+        public static string bullet_speed = "bullet_speed";
+        public static string bullet_virtical_speed = "bullet_virtical_speed";
     }
 
 
@@ -410,6 +420,14 @@ public class ODMVariable
 
         public static string is_conversation = "isConversation";
         public static string is_focus = "isFocus";
+
+        //Box
+        public static string is_crack = "isCrack";
+        public static string is_open_final = "isOpenFinal";
+        public static string is_crack_final = "isCrackFinal";
+
+
+
     }
 
     public static class text
@@ -431,8 +449,21 @@ public class ODMVariable
         public static string end = "[END]";
         public static string input = "[INPUT]";
         public static string pause = "[PAUSE]";
+    }
 
-
+    public static class level
+    {
+        public static float activate_range_x
+        {
+            get
+            {
+                return PlayerPrefs.GetFloat("activate_range_x");
+            }
+            set
+            {
+                PlayerPrefs.SetFloat("activate_range_x", value);
+            }
+        }
     }
 
     public static class system
@@ -460,7 +491,7 @@ public class ODMVariable
                 PlayerPrefs.SetString("lang", value);
             }
         }
-        
+
         public static string service_base
         {
             get

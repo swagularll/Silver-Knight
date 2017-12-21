@@ -10,11 +10,12 @@ public class backgroundGenerator : MonoBehaviour
     public GameObject mapUnit;
     public int seed = 0;
     public bool specialBackground = false;
-    int imageCount = 7;
-    int baseimageCount = 10;
+    private int imageCount = 7;
+    private int baseimageCount = 10;
 
     private List<Sprite> spriteCollection = new List<Sprite>();
     private List<Sprite> spriteBaseCollection = new List<Sprite>();
+    private float map_width = 4;
 
     void Awake()
     {
@@ -32,10 +33,10 @@ public class backgroundGenerator : MonoBehaviour
         for (int i = 0; i < mapSize; i++)
         {
             GameObject g = Instantiate(mapUnit);
-            g.transform.position = new Vector3(i * 4 + 2f, 5, 1);
+            g.transform.position = new Vector3(i * map_width + 2f, 5, 1);
             g.transform.parent = transform;
 
-            if (i % 4 == 0)
+            if (i % map_width == 0)
             {
                 mapUnit.GetComponent<SpriteRenderer>().sprite = spriteCollection[++seed % spriteCollection.Count];
             }
@@ -47,8 +48,10 @@ public class backgroundGenerator : MonoBehaviour
 
         float mapSizeFloat = (float)mapSize;
 
-        transform.GetComponent<BoxCollider2D>().offset = new Vector2((mapSizeFloat / 2) * 4, -1);
-        transform.GetComponent<BoxCollider2D>().size = new Vector2(mapSize * 4, 1);
+        transform.GetComponent<BoxCollider2D>().offset = new Vector2((mapSizeFloat / 2) * map_width, -1);
+        transform.GetComponent<BoxCollider2D>().size = new Vector2(mapSize * map_width, 1);
+
+        ODMVariable.level.activate_range_x = map_width * mapSize;
     }
 
 }

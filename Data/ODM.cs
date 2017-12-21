@@ -36,6 +36,17 @@ public class ODM
         return jsonString;
     }
 
+    #region SCENE
+    public static float getRandomPositionX(float basePositionX)
+    {
+        float drop_x = basePositionX + UnityEngine.Random.Range(-4f, 4f);
+        if (drop_x < 0)
+            drop_x += 1;
+        if (drop_x > ODMVariable.level.activate_range_x)
+            drop_x -= 1;
+        return drop_x;
+    }
+    #endregion
 
     #region DATA STRUCTURE
     public class ODMDictionary

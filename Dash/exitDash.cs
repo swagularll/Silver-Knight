@@ -57,7 +57,8 @@ public class exitDash : MonoBehaviour
         Time.timeScale = 1f;
         is_open = false;
         ani.SetBool(ODMVariable.animation.is_open, is_open);
-        ODMVariable.is_system_locked = false;
+        ODMVariable.fsm.scene_controller.SendEvent(eventName.end_system_hold);
+        //ODMVariable.is_system_locked = false;
         fsm.SendEvent(eventName.hide_menu);
         ODMObject.character_ava.GetComponent<actionControl>().enableControl();
     }

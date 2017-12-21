@@ -130,6 +130,7 @@ public class itemSetting : MonoBehaviour
     {
         public string item_guid { get; set; }//For item with same id
         public ODMVariable.itemCatalogue catalog_code { get; set; }//Equals to id in in item
+        public int amount { get; set; }
         public string located_level { get; set; }
         public double location_x { get; set; }
         public double location_y { get; set; }
@@ -143,6 +144,7 @@ public class itemSetting : MonoBehaviour
         {
             sceneItemInfo item_info = JsonMapper.ToObject<sceneItemInfo>(_json);
             this.catalog_code = item_info.catalog_code;
+            this.amount = item_info.amount;
             this.location_x = item_info.location_x;
             this.location_y = item_info.location_y;
             this.location_z = item_info.location_z;

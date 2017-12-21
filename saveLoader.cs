@@ -49,6 +49,8 @@ public class saveLoader : MonoBehaviour
             ODMVariable.fsm.player_control_disabled.
                 FsmVariables.GetFsmBool(ODMVariable.local.is_hurt_start).Value = false;
 
+            ODMVariable.ava_direction = 1f;
+
             if (ODMVariable.status_armor)
             {
                 ODMVariable.fsm.player_control.enabled = true;

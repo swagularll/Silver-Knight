@@ -69,17 +69,19 @@ public class itemManager : MonoBehaviour
             Vector3 deploy_location = new Vector3((float)item_info.location_x, (float)item_info.location_y, (float)item_info.location_z);
             GameObject scene_item = (GameObject)Instantiate(item_entity, deploy_location, Quaternion.identity);
             scene_item.GetComponent<itemSetting>().item_info.item_guid = item_info.item_guid;
+            scene_item.GetComponent<itemSetting>().item_info.amount = item_info.amount;
             scene_item.GetComponent<itemSetting>().initilaization();
         }
     }
 
-    public void createItem(string _item_id)
+    public void createItem(string _item_id, int _amout , float _drop_position_x)
     {
         GameObject item_entity = item_entity_dictionary[_item_id];//item_id = itemCatalogue.ToString();
-        Vector3 deploy_location = new Vector3(ODMObject.character_ava.transform.position.x, item_entity.transform.position.y, item_entity.transform.position.z);
+        Vector3 deploy_location = new Vector3(_drop_position_x, item_entity.transform.position.y, item_entity.transform.position.z);
         GameObject scene_item = (GameObject)Instantiate(item_entity, deploy_location, Quaternion.identity);
         scene_item.GetComponent<itemSetting>().initilaization();
         scene_item.GetComponent<itemSetting>().resetPositionInfo(deploy_location);
+        scene_item.GetComponent<itemSetting>().item_amount = _amout;
         registerItem(scene_item);
     }
 

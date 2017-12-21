@@ -27,9 +27,10 @@ public class savePoint : MonoBehaviour
 
         ODM.ODMDictionary lair_info_collection = ODMObject.event_manager.GetComponent<warmbugLairManager>().getWarmbugDistribution();
         List<itemSetting.sceneItemInfo> item_collection = ODMObject.event_manager.GetComponent<itemManager>().getItemDistribution();
+        ODM.ODMDictionary scene_info_collection = ODMObject.event_manager.GetComponent<sceneObjectManager>().getSceneObjectInfoCollection();
 
         //Generates saveRecord by collecting data from different scripts
-        saveRecord instance_save_record = new saveRecord(ODMVariable.system.save_code, dict_save_data, dict_flag_collection, diary_log, lair_info_collection, item_collection);
+        saveRecord instance_save_record = new saveRecord(ODMVariable.system.save_code, dict_save_data, dict_flag_collection, diary_log, lair_info_collection, item_collection, scene_info_collection);
         instance_save_record.saveProgress(instance_save_record);
 
         //display message

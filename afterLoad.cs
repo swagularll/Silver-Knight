@@ -7,8 +7,9 @@ using System;
 
 public class afterLoad : MonoBehaviour
 {
-    public List<GameObject> item_entity_collection;
     public List<GameObject> event_entity_collection;
+    public List<GameObject> item_entity_collection;
+    public List<GameObject> scene_object_collection;
 
     //For scene drag
     public GameObject obj_warmbug_lair;
@@ -17,6 +18,7 @@ public class afterLoad : MonoBehaviour
     private warmbugLair level_warmbug_lair;
     private eventCenter event_center;
     private itemManager item_manager;
+    private sceneObjectManager scene_info_manager;
 
     private string map_display_text;
     private string stage_flag_name;
@@ -28,6 +30,7 @@ public class afterLoad : MonoBehaviour
         event_center = ODMObject.event_manager.GetComponent<eventCenter>();
         item_manager = ODMObject.event_manager.GetComponent<itemManager>();
         level_warmbug_lair = obj_warmbug_lair.GetComponent<warmbugLair>();
+        scene_info_manager = ODMObject.event_manager.GetComponent<sceneObjectManager>();
 
         CMap currentMap = ODMObject.event_manager.GetComponent<MapDatabase>().getMap(Application.loadedLevelName);
         map_display_text = currentMap.name + " " + currentMap.title;
@@ -47,6 +50,7 @@ public class afterLoad : MonoBehaviour
 
             //Register local level warmbugs & items
             level_warmbug_lair.registerLevelLair();
+            this.registerAllSceneObjects();
             this.registerAllLevelItems();
         }
         else
@@ -86,7 +90,13 @@ public class afterLoad : MonoBehaviour
             item_entity_collection[i].GetComponent<itemSetting>().initilaization();
         }
     }
-
+    private void registerAllSceneObjects()
+    {
+        for (int i = 0; i < scene_object_collection.Count; i++)
+        {
+            scene_info_manager.registerSceneInfo(scene_object_collection[i].GetComponent<sceneObjectInfo>().getIdentifier());
+        }
+    }
     private void removeAllLevelItems()
     {
         for (int i = 0; i < item_entity_collection.Count; i++)

@@ -85,6 +85,8 @@ public class inventoryDash : MonoBehaviour
     private bool is_on_confirm_hold = false;
     private bool is_on_message_hold = false;
 
+    private int drop_count = 0;
+    private List<float> drop_location_collection;
 
     #region Initilization
     void Awake()
@@ -93,7 +95,7 @@ public class inventoryDash : MonoBehaviour
         item_db = GetComponent<ItemDatabase>();
         inventory_collection = new List<item>();
         slot_collection = new List<GameObject>();
-
+        drop_location_collection = new List<float>();
         for (int i = 0; i < item_collection_size; i++)
         {
             inventory_collection.Add(new item());
@@ -133,6 +135,8 @@ public class inventoryDash : MonoBehaviour
         }
         else
         {
+            addItem((int)ODMVariable.itemCatalogue.little_bastard, 10);
+
             //add items according to inventory data
             addItemArray(ODMObject.save_builder.GetComponent<saveLoader>().inventory_collection);
         }
@@ -163,8 +167,7 @@ public class inventoryDash : MonoBehaviour
                 {
                     state_control_modify_item = true;
                 }
-                else 
-                if(!is_modifying_item)
+                else if (!is_modifying_item)
                 {
                     startModifyItem();
                 }
@@ -353,7 +356,17 @@ public class inventoryDash : MonoBehaviour
                     ODMVariable.ava_current_poison = 0f;
                     ODMObject.message_display_panel.GetComponent<messagePanel>().showMessage(ODMVariable.translation.recover_toxic);
                     break;
-
+                case (int)ODMVariable.itemCatalogue.rct_pistol:
+                    if (ODMObject.current_activate_box != null)
+                    {
+                        checkAndTakeAway(inventory_collection[current_index].id);
+                        ODMObject.current_activate_box.GetComponent<luckyBox>().openBox();
+                    }
+                    else
+                    {
+                        ODMObject.message_display_panel.GetComponent<messagePanel>().showMessage(ODMVariable.translation.item_connot_use);
+                    }
+                    break;
                 default:
                     if (targetDoor != null)
                     {
@@ -551,13 +564,21 @@ public class inventoryDash : MonoBehaviour
     }
     private void dropItemConfirmationCheck()//Using item intro function
     {
-        is_on_confirm_hold = true;
-
-        if (inventory_collection[current_index].id != -1)
+        if (inventory_collection[current_index].id == (int)ODMVariable.itemCatalogue.little_bastard)
         {
-            panel_enabled = false;
-            string msg = dataWidget.getTranslaton(ODMVariable.translation.sure_drop_item);
-            ODMObject.confirmation_panel.GetComponent<confirmPanel>().showConfirmation(transform.gameObject, on_reply_drop_item, msg);
+            aud.clip = Resources.Load<AudioClip>(audioResource.wooden_fish);
+            aud.Play();
+            item_modification_fsm.SendEvent(eventName.back);
+        }
+        else
+        {
+            is_on_confirm_hold = true;
+            if (inventory_collection[current_index].id != -1)
+            {
+                panel_enabled = false;
+                string msg = dataWidget.getTranslaton(ODMVariable.translation.sure_drop_item);
+                ODMObject.confirmation_panel.GetComponent<confirmPanel>().showConfirmation(transform.gameObject, on_reply_drop_item, msg);
+            }
         }
     }
     public void confirmDropItem(bool _result)
@@ -566,10 +587,14 @@ public class inventoryDash : MonoBehaviour
 
         if (_result)
         {
+
+            drop_count += 1;//Minium 1
             itemManager item_manager = GetComponent<itemManager>();
-            item_manager.createItem(inventory_collection[current_index].id.ToString());
-            checkAndTakeAway(inventory_collection[current_index].id);
+            item_manager.createItem(inventory_collection[current_index].id.ToString(), 
+                inventory_collection[current_index].amount, ODM.getRandomPositionX(ODMObject.character_ava.transform.position.x));
+            checkAndTakeAway(inventory_collection[current_index].id, inventory_collection[current_index].amount);
             GetComponent<menuManager>().openMenu();
+
         }
         else
         {
@@ -578,7 +603,7 @@ public class inventoryDash : MonoBehaviour
             //item_modification_fsm.SendEvent(eventName.back);
         }
     }
-
+    
     //XXX
     public void useSerum()
     {
@@ -746,6 +771,13 @@ public class inventoryDash : MonoBehaviour
 
         return result;
     }
+    public void checkAndTakeAway(int _item_id, int _amount)
+    {
+        for (int i = 0; i < _amount; i++)
+        {
+            checkAndTakeAway(_item_id);
+        }
+    }
     public void reload(int needAmont)
     {
         if (ODMVariable.bullet_stock > 0)
@@ -790,7 +822,8 @@ public class inventoryDash : MonoBehaviour
         aud.Play();
 
         GetComponent<menuManager>().disableMiddleTab();//make the top tab goes back to previous state...
-        panel_enabled = state_control = is_modifying_item = is_combining_item = false;
+        state_control = state_control_modify_item = state_control_combine_item =
+           panel_enabled = is_modifying_item = is_combining_item = false;
 
         ODMObject.confirmation_panel.GetComponent<confirmPanel>().quitPanel();
         item_modification_fsm.SendEvent(eventName.hide_menu);
@@ -815,7 +848,6 @@ public class inventoryDash : MonoBehaviour
     private void hideDescription()
     {
         is_on_message_hold = false;
-        inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
     }
 
     public void refreshStatus()
@@ -823,6 +855,7 @@ public class inventoryDash : MonoBehaviour
         #region Panel Visibility
         if (is_on_message_hold)
         {
+            Debug.Log("is_on_message_hold");
             inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
             inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
             inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
@@ -833,6 +866,8 @@ public class inventoryDash : MonoBehaviour
         }
         else if (is_combining_item)
         {
+            Debug.Log("is_combining_item");
+
             inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
             inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
             inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
@@ -845,6 +880,8 @@ public class inventoryDash : MonoBehaviour
         }
         else if (is_modifying_item)
         {
+            Debug.Log("is_modifying_item");
+
             inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
             inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
             inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
@@ -857,6 +894,8 @@ public class inventoryDash : MonoBehaviour
         }
         else
         {
+            Debug.Log("else");
+
             if (current_index != -1)
             {
                 inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
@@ -1023,6 +1062,7 @@ public class inventoryDash : MonoBehaviour
     {
         current_page = 1;
         current_index = -1;
+        drop_count = 0;
         clearCombineItems();
         updatePage();
     }
