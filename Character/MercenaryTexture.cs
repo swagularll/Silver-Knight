@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class MercenaryTexture : MonoBehaviour
 {
     //small fix
-    private SkeletonAnimation s;
+    private SkeletonAnimation skeleton_animation;
 
     public bool isPink = true;
     public bool isYellow = true;
@@ -118,7 +118,7 @@ public class MercenaryTexture : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        s = transform.GetComponent<SkeletonAnimation>();
+        skeleton_animation = transform.GetComponent<SkeletonAnimation>();
         if (isPink && isYellow || !isPink && !isYellow)//random
         {
             bool b = convertFloatToBool(Random.value);
@@ -150,17 +150,17 @@ public class MercenaryTexture : MonoBehaviour
 
     public void setYellowShit()
     {
-        s.skeleton.SetAttachment(headSlot, normalHeadYellow);
-        s.skeleton.SetAttachment(leftHandSlot, LeftHandYellow);
-        s.skeleton.SetAttachment(rightHandSlot, RightHandYellow);
+        skeleton_animation.skeleton.SetAttachment(headSlot, normalHeadYellow);
+        skeleton_animation.skeleton.SetAttachment(leftHandSlot, LeftHandYellow);
+        skeleton_animation.skeleton.SetAttachment(rightHandSlot, RightHandYellow);
         setEquipment();
     }
 
     public void setPinkShit()
     {
-        s.skeleton.SetAttachment(headSlot, normalHeadPink);
-        s.skeleton.SetAttachment(leftHandSlot, LeftHandPink);
-        s.skeleton.SetAttachment(rightHandSlot, RightHandPink);
+        skeleton_animation.skeleton.SetAttachment(headSlot, normalHeadPink);
+        skeleton_animation.skeleton.SetAttachment(leftHandSlot, LeftHandPink);
+        skeleton_animation.skeleton.SetAttachment(rightHandSlot, RightHandPink);
         setEquipment();
     }
     private void setEquipment()
@@ -174,49 +174,49 @@ public class MercenaryTexture : MonoBehaviour
         switch (armor)
         {
             case 0:
-                s.skeleton.SetAttachment(armorSlot, armorA);
+                skeleton_animation.skeleton.SetAttachment(armorSlot, armorA);
                 break;
             case 1:
-                s.skeleton.SetAttachment(armorSlot, armorB);
+                skeleton_animation.skeleton.SetAttachment(armorSlot, armorB);
                 break;
             case 2:
-                s.skeleton.SetAttachment(armorSlot, armorC);
+                skeleton_animation.skeleton.SetAttachment(armorSlot, armorC);
                 break;
         }
 
 
         if (convertFloatToBool(haveWeapon))
         {
-            s.skeleton.SetAttachment(weaponSlot, gun);
-            s.skeleton.SetAttachment(sideKnifeSlot, knifeSide);
+            skeleton_animation.skeleton.SetAttachment(weaponSlot, gun);
+            skeleton_animation.skeleton.SetAttachment(sideKnifeSlot, knifeSide);
             weaponStyle = true;
 
         }
         else
         {
-            s.skeleton.SetAttachment(weaponSlot, knife);
-            s.skeleton.SetAttachment(sideKnifeSlot, null);
+            skeleton_animation.skeleton.SetAttachment(weaponSlot, knife);
+            skeleton_animation.skeleton.SetAttachment(sideKnifeSlot, null);
 
         }
 
         if (convertFloatToBool(haveRightPack))
         {
-            s.skeleton.SetAttachment(packLeft, packLeft);
+            skeleton_animation.skeleton.SetAttachment(packLeft, packLeft);
         }
         else
         {
-            s.skeleton.SetAttachment(packLeft, null);
+            skeleton_animation.skeleton.SetAttachment(packLeft, null);
 
         }
 
         if (convertFloatToBool(haveLeftPack))
         {
-            s.skeleton.SetAttachment(packRight, packRight);
+            skeleton_animation.skeleton.SetAttachment(packRight, packRight);
 
         }
         else
         {
-            s.skeleton.SetAttachment(packRight, null);
+            skeleton_animation.skeleton.SetAttachment(packRight, null);
         }
     }
 

@@ -53,8 +53,10 @@ public class inventoryDash : MonoBehaviour
     public List<item> inventory_collection;
     public List<GameObject> slot_collection;
 
-    private item temp_selected_combine_item_a;
-    private item temp_selected_combine_item_b;
+    public GameObject button_drop;
+
+    private item selected_item_a;
+    private item selected_item_b;
 
     public Sprite no_item_image;
 
@@ -85,7 +87,6 @@ public class inventoryDash : MonoBehaviour
     private bool is_on_confirm_hold = false;
     private bool is_on_message_hold = false;
 
-    private int drop_count = 0;
     private List<float> drop_location_collection;
 
     #region Initilization
@@ -132,10 +133,21 @@ public class inventoryDash : MonoBehaviour
         {
             addItem((int)ODMVariable.itemCatalogue.talent_necklace, 1);
             addItem((int)ODMVariable.itemCatalogue.rct_pistol, 1);
+
+
         }
         else
         {
+
+            ODMVariable.current_bullet = 0;
+            //Development items
+            addItem((int)ODMVariable.itemCatalogue.rct_pistol, 11);
+            ODMVariable.ava_current_weapon = 1;
             addItem((int)ODMVariable.itemCatalogue.little_bastard, 10);
+            addItem((int)ODMVariable.itemCatalogue.red_core_technology_energy, 12);
+            addItem((int)ODMVariable.itemCatalogue.empire_bullet, 12);
+            addItem((int)ODMVariable.itemCatalogue.enhanced_component, 1);
+
 
             //add items according to inventory data
             addItemArray(ODMObject.save_builder.GetComponent<saveLoader>().inventory_collection);
@@ -286,6 +298,20 @@ public class inventoryDash : MonoBehaviour
             //Clear data
             clearCombineItems();
 
+            //Check if item is dropable
+            if (inventory_collection[current_index].id == (int)ODMVariable.itemCatalogue.little_bastard ||
+                inventory_collection[current_index].id == (int)ODMVariable.itemCatalogue.rct_pistol ||
+                inventory_collection[current_index].id == (int)ODMVariable.itemCatalogue.rct_pistol_enhanced)
+            {
+                button_drop.gameObject.SetActive(false);
+                item_modification_fsm.FsmVariables.GetFsmBool(ODMVariable.local.is_special_item).Value = true;
+            }
+            else
+            {
+                button_drop.gameObject.SetActive(true);
+                item_modification_fsm.FsmVariables.GetFsmBool(ODMVariable.local.is_special_item).Value = false;
+            }
+
             //Send events
             item_modification_fsm.SendEvent(eventName.show_menu);
             refreshStatus();
@@ -356,7 +382,9 @@ public class inventoryDash : MonoBehaviour
                     ODMVariable.ava_current_poison = 0f;
                     ODMObject.message_display_panel.GetComponent<messagePanel>().showMessage(ODMVariable.translation.recover_toxic);
                     break;
+
                 case (int)ODMVariable.itemCatalogue.rct_pistol:
+                    //Try to open a lucky box XXX
                     if (ODMObject.current_activate_box != null)
                     {
                         checkAndTakeAway(inventory_collection[current_index].id);
@@ -417,71 +445,152 @@ public class inventoryDash : MonoBehaviour
             stopModifyItem(true);
         }
     }
-    //private void stopUsingItem()
-    //{
-    //    stopModifyItem(false);
-    //}
 
     public void startCombineItem()
     {
         aud.clip = Resources.Load<AudioClip>(audioResource.electrical);
         aud.Play();
         panel_enabled = is_combining_item = true;
-        temp_selected_combine_item_a = inventory_collection[current_index];
+        selected_item_a = inventory_collection[current_index];
         temp_in_selection_index = current_index;
         inventory_selected_item_a.GetComponent<Image>().sprite = inventory_collection[current_index].sprite;
         refreshStatus();
 
         //FSM show combine message
     }
-    //public void stopCombineItem(bool _play_sound)
-    //{
-    //    if (_play_sound)
-    //    {
-    //        aud.clip = Resources.Load<AudioClip>(audioResource.electrical_out);
-    //        aud.Play();
-    //    }
 
-    //    panel_enabled = is_combining_item = false;
-    //    clearCombineItems();
-    //    item_modification_fsm.SendEvent(eventName.back);
-    //    refreshStatus();
-    //}
     public void tryCombineItem()
     {
+        selected_item_b = inventory_collection[current_index];
+
         if (inventory_collection[current_index].id == -1)
         {
             aud.clip = Resources.Load<AudioClip>(audioResource.wooden_fish);
             aud.Play();
         }
-        else if (inventory_collection[current_index].id == temp_selected_combine_item_a.id)
+        else if (selected_item_b.id == selected_item_a.id)
         {
             aud.clip = Resources.Load<AudioClip>(audioResource.wooden_fish);
             aud.Play();
         }
-        else
+        //Refill bullets
+        else if (checkRefillItems())
         {
-            temp_selected_combine_item_b = inventory_collection[current_index];
+            //taking out bullets
+            int bullet_id;
+            int bullet_amount = ODMVariable.current_bullet;
+            if (ODMVariable.ava_current_weapon == 1 || ODMVariable.ava_current_weapon == 3)
+                bullet_id = (int)ODMVariable.itemCatalogue.red_core_technology_energy;
+            else
+                bullet_id = (int)ODMVariable.itemCatalogue.empire_bullet;
 
-            bool result = combineItem();
-            if (result)
+            bool is_same = false;
+
+            if ((selected_item_a.id == (int)ODMVariable.itemCatalogue.red_core_technology_energy ||
+                selected_item_b.id == (int)ODMVariable.itemCatalogue.red_core_technology_energy) &&
+                (ODMVariable.ava_current_weapon == 1 || ODMVariable.ava_current_weapon == 3))
+                is_same = true;
+
+            if ((selected_item_a.id == (int)ODMVariable.itemCatalogue.empire_bullet ||
+                selected_item_b.id == (int)ODMVariable.itemCatalogue.empire_bullet) &&
+                ODMVariable.ava_current_weapon == 2)
+                is_same = true;
+
+            if (ODMVariable.current_bullet != ODMVariable.bullet_max || !is_same)
             {
-                //Successfully combined item
+                //Take out bullets
+                if (hasEnhanced())
+                    checkAndTakeAway((int)ODMVariable.itemCatalogue.rct_pistol_enhanced, bullet_amount);
+                else
+                    checkAndTakeAway((int)ODMVariable.itemCatalogue.rct_pistol, bullet_amount);
+                addItem(bullet_id, bullet_amount);
+
+                //Fill bullet
+                if (selected_item_a.id == (int)ODMVariable.itemCatalogue.red_core_technology_energy ||
+                    selected_item_b.id == (int)ODMVariable.itemCatalogue.red_core_technology_energy)
+                {
+                    int bullets_count = getItemAmount((int)ODMVariable.itemCatalogue.red_core_technology_energy);
+                    int numbers_of_bullet_to_add = bullets_count >= ODMVariable.bullet_max ? ODMVariable.bullet_max : bullets_count;
+
+                    if (hasEnhanced())
+                    {
+                        ODMVariable.ava_current_weapon = 3;
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol_enhanced, numbers_of_bullet_to_add);
+                    }
+                    else
+                    {
+                        ODMVariable.ava_current_weapon = 1;
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol, numbers_of_bullet_to_add);
+                    }
+
+                    checkAndTakeAway((int)ODMVariable.itemCatalogue.red_core_technology_energy, numbers_of_bullet_to_add);
+                }
+                else if (selected_item_a.id == (int)ODMVariable.itemCatalogue.empire_bullet ||
+                    selected_item_b.id == (int)ODMVariable.itemCatalogue.empire_bullet)
+                {
+                    int bullets_count = getItemAmount((int)ODMVariable.itemCatalogue.empire_bullet);
+                    int numbers_of_bullet_to_add = bullets_count >= ODMVariable.bullet_max ? ODMVariable.bullet_max : bullets_count;
+
+                    ODMVariable.ava_current_weapon = 2;
+                    if (hasEnhanced())
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol_enhanced, numbers_of_bullet_to_add);
+                    else
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol, numbers_of_bullet_to_add);
+                    checkAndTakeAway((int)ODMVariable.itemCatalogue.empire_bullet, numbers_of_bullet_to_add);
+                }
+
                 aud.clip = Resources.Load<AudioClip>(audioResource.get_item);
                 aud.Play();
                 showDescription(ODMVariable.translation.auto_save, ODMVariable.translation.auto_save);
-            }
-            else
-            {
-                aud.clip = Resources.Load<AudioClip>(audioResource.electrical_out);
-                aud.Play();
 
-                //Show fail to combine item message
-                showDescription(ODMVariable.translation.auto_save, ODMVariable.translation.auto_save);
+                state_control_combine_item = false;
+                stopModifyItem(false);
             }
-            state_control_combine_item = false;
-            stopModifyItem(false);
+            else//Bullet full
+            {
+                aud.clip = Resources.Load<AudioClip>(audioResource.wooden_fish);
+                aud.Play();
+            }
         }
+        else
+        {
+            showCombineResult();
+        }
+    }
+
+    private bool checkRefillItems()
+    {
+        if ((selected_item_a.id == (int)ODMVariable.itemCatalogue.rct_pistol || selected_item_a.id == (int)ODMVariable.itemCatalogue.rct_pistol_enhanced) && (
+            selected_item_b.id == (int)ODMVariable.itemCatalogue.red_core_technology_energy ||
+            selected_item_b.id == (int)ODMVariable.itemCatalogue.empire_bullet)
+             ||
+             (selected_item_a.id == (int)ODMVariable.itemCatalogue.red_core_technology_energy ||
+             selected_item_a.id == (int)ODMVariable.itemCatalogue.empire_bullet) &&
+             (selected_item_b.id == (int)ODMVariable.itemCatalogue.rct_pistol || selected_item_b.id == (int)ODMVariable.itemCatalogue.rct_pistol_enhanced))
+            return true;
+        return false;
+    }
+
+    private void showCombineResult()
+    {
+        bool result = combineItem();
+        if (result)
+        {
+            //Successfully combined item
+            aud.clip = Resources.Load<AudioClip>(audioResource.get_item);
+            aud.Play();
+            showDescription(ODMVariable.translation.auto_save, ODMVariable.translation.auto_save);
+        }
+        else
+        {
+            aud.clip = Resources.Load<AudioClip>(audioResource.electrical_out);
+            aud.Play();
+
+            //Show fail to combine item message
+            showDescription(ODMVariable.translation.auto_save, ODMVariable.translation.auto_save);
+        }
+        state_control_combine_item = false;
+        stopModifyItem(false);
     }
 
     private void sortItem(int _current_item_index, int _target_item_index)
@@ -520,34 +629,70 @@ public class inventoryDash : MonoBehaviour
         refreshStatus();
     }
 
+    private bool checkCombineItemExist(int _first_item_id, int _second_item_id)
+    {
+        if (selected_item_a.id == _first_item_id && selected_item_b.id == _second_item_id)
+            return true;
+        else if (selected_item_a.id == _second_item_id && selected_item_b.id == _first_item_id)
+            return true;
+        return false;
+    }
+
     public bool combineItem()
     {
         bool result = false;
 
-        string[] combination_list = temp_selected_combine_item_a.combination.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-        for (int i = 0; i < combination_list.Length; i++)
+        string[] combination_list = selected_item_a.combination.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+        if (checkCombineItemExist((int)ODMVariable.itemCatalogue.enhanced_component, (int)ODMVariable.itemCatalogue.rct_pistol))
         {
-            string[] comb = combination_list[i].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            if (comb.Length == 2)
+            //Enhance weapon
+            int bullets_in_pistol = 0;
+            if (selected_item_a.id == (int)ODMVariable.itemCatalogue.rct_pistol)
             {
-                int item_b_id = Int32.Parse(comb[0]);
-                int item_output_id = Int32.Parse(comb[1]);
+                bullets_in_pistol = selected_item_a.amount;
+            }
+            else if (selected_item_b.id == (int)ODMVariable.itemCatalogue.rct_pistol)
+            {
+                bullets_in_pistol = selected_item_b.amount;
+            }
+            if (ODMVariable.ava_current_weapon == 1)
+                ODMVariable.ava_current_weapon = 3;
+            int pistol_slot_index = getItemSlot((int)ODMVariable.itemCatalogue.rct_pistol);
 
-                if (item_b_id == temp_selected_combine_item_b.id)
+            //Remove Pistol
+            inventory_collection[pistol_slot_index] = new item();
+            ODMVariable.current_bullet = 0;
+            //Add New Pistol
+            addItem((int)ODMVariable.itemCatalogue.rct_pistol_enhanced, bullets_in_pistol);
+
+            //For Message Display
+            result = true;
+            temp_last_added_item_index = temp_in_selection_index = 0;
+        }
+        else
+        {
+            for (int i = 0; i < combination_list.Length; i++)
+            {
+                string[] comb = combination_list[i].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (comb.Length == 2)
                 {
-                    checkAndTakeAway(temp_selected_combine_item_a.id);
-                    checkAndTakeAway(temp_selected_combine_item_b.id);
-                    addItem(item_output_id);
-                    result = true;
-                    break;
+                    int item_b_id = Int32.Parse(comb[0]);
+                    int item_output_id = Int32.Parse(comb[1]);
+
+                    if (item_b_id == selected_item_b.id)
+                    {
+                        checkAndTakeAway(selected_item_a.id);
+                        checkAndTakeAway(selected_item_b.id);
+                        addItem(item_output_id);
+                        result = true;
+                        break;
+                    }
+                }
+                else
+                {
+                    ODM.errorLog(transform.name, "tryCombineItem Error: Invalid data type.");
                 }
             }
-            else
-            {
-                ODM.errorLog(transform.name, "tryCombineItem Error: Invalid data type.");
-            }
-
         }
         if (result)
         {
@@ -559,8 +704,8 @@ public class inventoryDash : MonoBehaviour
 
     public void clearCombineItems()
     {
-        temp_selected_combine_item_a = null;
-        temp_selected_combine_item_b = null;
+        selected_item_a = null;
+        selected_item_b = null;
     }
     private void dropItemConfirmationCheck()//Using item intro function
     {
@@ -587,11 +732,9 @@ public class inventoryDash : MonoBehaviour
 
         if (_result)
         {
-
-            drop_count += 1;//Minium 1
             itemManager item_manager = GetComponent<itemManager>();
-            item_manager.createItem(inventory_collection[current_index].id.ToString(), 
-                inventory_collection[current_index].amount, ODM.getRandomPositionX(ODMObject.character_ava.transform.position.x));
+            item_manager.createItem(inventory_collection[current_index].id.ToString(),
+                inventory_collection[current_index].amount, ODM.getRandomPositionX(ODMObject.character_ava.transform.position.x, 4f));
             checkAndTakeAway(inventory_collection[current_index].id, inventory_collection[current_index].amount);
             GetComponent<menuManager>().openMenu();
 
@@ -603,8 +746,7 @@ public class inventoryDash : MonoBehaviour
             //item_modification_fsm.SendEvent(eventName.back);
         }
     }
-    
-    //XXX
+
     public void useSerum()
     {
         checkAndTakeAway((int)ODMVariable.itemCatalogue.creature_serum);
@@ -642,21 +784,24 @@ public class inventoryDash : MonoBehaviour
         //Reject serum
         ODMVariable.status_serum = true;
     }
-    public void addItem(int _item_id)
+    public bool addItem(int _item_id)
     {
+        bool result = false;
+
+        #region Add Item Customization
         if (_item_id == (int)ODMVariable.itemCatalogue.device_battery)
             _item_id = (int)ODMVariable.itemCatalogue.little_bastard;
 
+
         item itemToAdd = item_db.getItem(_item_id);
 
-        if (_item_id == (int)ODMVariable.itemCatalogue.red_core_technology_energy)
+        if (_item_id == (int)ODMVariable.itemCatalogue.rct_pistol ||
+            _item_id == (int)ODMVariable.itemCatalogue.rct_pistol_enhanced)
         {
-            ODMVariable.bullet_stock++;
+            ODMVariable.current_bullet++;
         }
-        if (_item_id == (int)ODMVariable.itemCatalogue.creature_serum)
-        {
-            ODMVariable.serum_count++;
-        }
+        #endregion
+
         if (checkItemExist(itemToAdd) && itemToAdd.stackable)
         {
             for (int i = 0; i < inventory_collection.Count; i++)
@@ -664,6 +809,7 @@ public class inventoryDash : MonoBehaviour
                 if (itemToAdd.id == inventory_collection[i].id)
                 {
                     inventory_collection[i].amount++;
+                    result = true;
                     break;
                 }
             }
@@ -676,11 +822,12 @@ public class inventoryDash : MonoBehaviour
                 {
                     temp_last_added_item_index = i;
                     inventory_collection[i] = itemToAdd;//put selected item into collection
+                    result = true;
                     break;
                 }
             }
         }
-        updatePage();
+        return result;
     }
     public void addItem(int index, int amount)
     {
@@ -706,6 +853,22 @@ public class inventoryDash : MonoBehaviour
         else
             return false;
     }
+    public int getItemAmount(int _item_id)
+    {
+        return inventory_collection.Where(x => x.id == _item_id).FirstOrDefault() == null ?
+            0 : inventory_collection.Where(x => x.id == _item_id).FirstOrDefault().amount;
+    }
+
+    public int getItemSlot(int _item_id)
+    {
+        for (int i = 0; i < inventory_collection.Count; i++)
+        {
+            if (inventory_collection[i].id == _item_id)
+                return i;
+        }
+        return -1;
+    }
+
     public bool checkAndTakeAway(int _item_id)
     {
         bool result = false;
@@ -718,7 +881,19 @@ public class inventoryDash : MonoBehaviour
                 {
                     item inStockItem = inventory_collection[i];
 
-                    if (inStockItem.amount == 1 && itemToUse.id != (int)ODMVariable.itemCatalogue.little_bastard)
+                    #region Remove Item Customization
+                    if (itemToUse.id == (int)ODMVariable.itemCatalogue.rct_pistol || itemToUse.id == (int)ODMVariable.itemCatalogue.rct_pistol_enhanced)
+                    {
+                        ODMVariable.current_bullet--;
+                    }
+                    #endregion
+
+                    //Items that Amout = 0 won't remove
+                    if (inStockItem.amount == 1 &&
+                        itemToUse.id != (int)ODMVariable.itemCatalogue.little_bastard &&
+                        itemToUse.id != (int)ODMVariable.itemCatalogue.rct_pistol &&
+                        itemToUse.id != (int)ODMVariable.itemCatalogue.rct_pistol_enhanced
+                        )
                     {
                         inventory_collection[i] = new item();//remove item which have only one in amount
                     }
@@ -778,15 +953,113 @@ public class inventoryDash : MonoBehaviour
             checkAndTakeAway(_item_id);
         }
     }
-    public void reload(int needAmont)
+
+    public int getPistolBulletAmount()
     {
-        if (ODMVariable.bullet_stock > 0)
+        int pistol_amount = getItemAmount((int)ODMVariable.itemCatalogue.rct_pistol);
+        if (pistol_amount == 0)
+            pistol_amount = getItemAmount((int)ODMVariable.itemCatalogue.rct_pistol_enhanced);
+        return pistol_amount;
+    }
+    /// <summary>
+    /// This method is called by actionControl
+    /// </summary>
+    public void reload()
+    {
+        int weapon_status = ODMVariable.ava_current_weapon;
+        int remaining_bullets = getPistolBulletAmount();
+
+        //Take out bullets
+        if (hasEnhanced())
+            checkAndTakeAway((int)ODMVariable.itemCatalogue.rct_pistol_enhanced, remaining_bullets);
+        else
+            checkAndTakeAway((int)ODMVariable.itemCatalogue.rct_pistol, remaining_bullets);
+        switch (weapon_status)
         {
-            for (int i = 0; i < needAmont; i++)
+            case 1:
+                addItem((int)ODMVariable.itemCatalogue.red_core_technology_energy, remaining_bullets);
+                break;
+            case 2:
+                addItem((int)ODMVariable.itemCatalogue.empire_bullet, remaining_bullets);
+                break;
+            case 3:
+                addItem((int)ODMVariable.itemCatalogue.red_core_technology_energy, remaining_bullets);
+                break;
+        }
+
+
+        int rct_bullet_amount = getItemAmount((int)ODMVariable.itemCatalogue.red_core_technology_energy);
+        int empire_bullet_amount = getItemAmount((int)ODMVariable.itemCatalogue.empire_bullet);
+
+        if (rct_bullet_amount != 0 || empire_bullet_amount != 0)
+        {
+            if (weapon_status == 1 || weapon_status == 3)
             {
-                checkAndTakeAway((int)ODMVariable.itemCatalogue.red_core_technology_energy);
+                if (rct_bullet_amount == 0)//If no current type bullets left
+                {
+                    //Change bullet type reload - Empire
+                    int bullets_to_reload = empire_bullet_amount >= ODMVariable.bullet_max ? ODMVariable.bullet_max : empire_bullet_amount;
+                    checkAndTakeAway((int)ODMVariable.itemCatalogue.empire_bullet, bullets_to_reload);
+                    ODMVariable.ava_current_weapon = 2;
+                    if (hasEnhanced())
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol_enhanced, bullets_to_reload);
+                    else
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol, bullets_to_reload);
+                }
+                else
+                {
+                    int bullets_to_reload = rct_bullet_amount >= ODMVariable.bullet_max ? ODMVariable.bullet_max : rct_bullet_amount;
+                    checkAndTakeAway((int)ODMVariable.itemCatalogue.red_core_technology_energy, bullets_to_reload);
+                    if (hasEnhanced())
+                    {
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol_enhanced, bullets_to_reload);
+                        ODMVariable.ava_current_weapon = 3;
+                    }
+                    else
+                    {
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol, bullets_to_reload);
+                        ODMVariable.ava_current_weapon = 1;
+                    }
+                }
+            }
+            else if (weapon_status == 2)
+            {
+                if (empire_bullet_amount == 0)//If no current type bullets left
+                {
+                    //Change bullet type reload - RCT
+                    int bullets_to_reload = rct_bullet_amount >= ODMVariable.bullet_max ? ODMVariable.bullet_max : rct_bullet_amount;
+                    checkAndTakeAway((int)ODMVariable.itemCatalogue.red_core_technology_energy, bullets_to_reload);
+                    if (hasEnhanced())
+                    {
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol_enhanced, bullets_to_reload);
+                        ODMVariable.ava_current_weapon = 3;
+                    }
+                    else
+                    {
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol, bullets_to_reload);
+                        ODMVariable.ava_current_weapon = 1;
+                    }
+                }
+                else
+                {
+                    int bullets_to_reload = empire_bullet_amount >= ODMVariable.bullet_max ? ODMVariable.bullet_max : empire_bullet_amount;
+                    checkAndTakeAway((int)ODMVariable.itemCatalogue.empire_bullet, bullets_to_reload);
+                    ODMVariable.ava_current_weapon = 2;
+                    if (hasEnhanced())
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol_enhanced, bullets_to_reload);
+                    else
+                        addItem((int)ODMVariable.itemCatalogue.rct_pistol, bullets_to_reload);
+                }
             }
         }
+        else
+        {
+
+        }
+    }
+    public bool hasEnhanced()
+    {
+        return checkItemExist((int)ODMVariable.itemCatalogue.rct_pistol_enhanced);
     }
     #endregion
 
@@ -810,7 +1083,7 @@ public class inventoryDash : MonoBehaviour
     public void openPanel()
     {
         state_control_modify_item = panel_enabled = true;
-        inventory_item_modification_panel.SendMessage(eventName.system.hide_gui);
+        inventory_item_modification_panel.SendMessage(eventName.sys.hide_gui);
 
         current_index = 0;
         refreshStatus();
@@ -855,7 +1128,6 @@ public class inventoryDash : MonoBehaviour
         #region Panel Visibility
         if (is_on_message_hold)
         {
-            Debug.Log("is_on_message_hold");
             inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
             inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
             inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
@@ -866,8 +1138,6 @@ public class inventoryDash : MonoBehaviour
         }
         else if (is_combining_item)
         {
-            Debug.Log("is_combining_item");
-
             inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
             inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
             inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
@@ -880,8 +1150,6 @@ public class inventoryDash : MonoBehaviour
         }
         else if (is_modifying_item)
         {
-            Debug.Log("is_modifying_item");
-
             inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
             inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
             inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
@@ -894,8 +1162,6 @@ public class inventoryDash : MonoBehaviour
         }
         else
         {
-            Debug.Log("else");
-
             if (current_index != -1)
             {
                 inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, true);
@@ -905,6 +1171,8 @@ public class inventoryDash : MonoBehaviour
                 inventory_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
             }
             inventory_modification_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+            inventory_message_description_area.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);
+
             inventory_modification_display_panel.GetComponent<CanvasGroup>().alpha = 1;
             inventory_combination_display_panel.GetComponent<CanvasGroup>().alpha = 0;
             inventory_item_modification_panel.GetComponent<CanvasGroup>().alpha = 0;
@@ -925,7 +1193,7 @@ public class inventoryDash : MonoBehaviour
 
             }
             if (is_combining_item && convertToSlotIndex() != i &&
-                inventory_collection[(current_page - 1) * slot_count + i % slot_count].id == temp_selected_combine_item_a.id)
+                inventory_collection[(current_page - 1) * slot_count + i % slot_count].id == selected_item_a.id)
             {
                 slot_collection[i].GetComponent<Animator>().SetBool(ODMVariable.animation.is_selectable, false);
             }
@@ -961,6 +1229,28 @@ public class inventoryDash : MonoBehaviour
                 {
                     slot_collection[i].transform.GetChild(0).transform.GetChild(0).GetComponent<Text>().text = "";
                 }
+
+                if (item.id == (int)ODMVariable.itemCatalogue.rct_pistol ||
+                    item.id == (int)ODMVariable.itemCatalogue.rct_pistol_enhanced)
+                {
+                    if (ODMVariable.ava_current_weapon == 1 || ODMVariable.ava_current_weapon == 3)
+                        slot_collection[i].transform.GetChild(0).GetChild(0).GetComponent<Text>().color = ODMVariable.color.red_amount;
+                    else if (ODMVariable.ava_current_weapon == 2)
+                        slot_collection[i].transform.GetChild(0).GetChild(0).GetComponent<Text>().color = ODMVariable.color.green_amount;
+                }
+                else if (item.id == (int)ODMVariable.itemCatalogue.red_core_technology_energy)
+                {
+                    slot_collection[i].transform.GetChild(0).GetChild(0).GetComponent<Text>().color = ODMVariable.color.red_amount;
+                }
+                else if (item.id == (int)ODMVariable.itemCatalogue.empire_bullet)
+                {
+                    slot_collection[i].transform.GetChild(0).GetChild(0).GetComponent<Text>().color = ODMVariable.color.green_amount;
+                }
+                else
+                {
+                    slot_collection[i].transform.GetChild(0).GetChild(0).GetComponent<Text>().color = ODMVariable.color.white;
+                }
+
                 slot_collection[i].transform.GetChild(1).GetComponent<Text>().text = item.shortName;
             }
         }
@@ -1030,7 +1320,6 @@ public class inventoryDash : MonoBehaviour
     #endregion
 
     #region Data Manipulation
-
     public string getItemArray()
     {
         List<int[]> listItemData = new List<int[]>();
@@ -1062,7 +1351,6 @@ public class inventoryDash : MonoBehaviour
     {
         current_page = 1;
         current_index = -1;
-        drop_count = 0;
         clearCombineItems();
         updatePage();
     }

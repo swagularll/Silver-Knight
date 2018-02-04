@@ -114,9 +114,19 @@ public class eventFlagChecker : MonoBehaviour
         }
     }
 
-    //renew code
-    public void flagCheck()
+
+
+    ////renew code
+    //public void flagCheck()
+    //{
+    //    ODM.errorLog("Calling wrong evnet!", "");
+    //}
+
+    #region For Call
+    public void registerEvent(GameObject _level_loader)
     {
-        ODM.errorLog("Calling wrong evnet!", "");
+        _level_loader.GetComponent<afterLoad>().addToEventCollection(transform.gameObject);
     }
+    #endregion
+
 }

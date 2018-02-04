@@ -148,6 +148,13 @@ public class ODMVariable
         set
         { FsmVariables.GlobalVariables.GetFsmBool("status_protected").Value = value; }
     }
+    public static bool status_horney
+    {
+        get
+        { return FsmVariables.GlobalVariables.GetFsmBool("status_horney").Value; }
+        set
+        { FsmVariables.GlobalVariables.GetFsmBool("status_horney").Value = value; }
+    }
 
     //Player resource
     public static int serum_count
@@ -279,6 +286,13 @@ public class ODMVariable
                 return fsmHelper.getFsm(ODMObject.event_manager, "Scene Controller");
             }
         }
+        public static PlayMakerFSM fade
+        {
+            get
+            {
+                return fsmHelper.getFsm(ODMObject.event_manager, "Fade");
+            }
+        }
 
         //Player
         public static PlayMakerFSM player_control
@@ -365,6 +379,7 @@ public class ODMVariable
         //Ava
         public static string ava_hurt_force = "ava_hurt_force";
         public static string is_hurt_start = "is_hurt_start";
+        public static string bullets_needed = "bullets_needed";
 
         //Confirm panel
         public static string response = "response";
@@ -389,6 +404,13 @@ public class ODMVariable
         //For bullet
         public static string bullet_speed = "bullet_speed";
         public static string bullet_virtical_speed = "bullet_virtical_speed";
+
+        //Warmbug Health System
+        public static string bullet_power = "bullet_power";
+
+        //For special items
+        public static string is_special_item = "is_special_item";
+
     }
 
 
@@ -398,6 +420,7 @@ public class ODMVariable
     {
 
         public static string default_fsm = "FSM";
+        public static string health_fsm = "Health System";
 
         public static string initilization_level_name = "initialization";
 
@@ -841,7 +864,7 @@ public class ODMVariable
     public static class color
     {
         public static Color32 green_accessable_door = new Color32(73, 219, 61, 255);
-        public static Color32 red_blocked_door = new Color32(73, 219, 61, 255);
+        public static Color32 red_blocked_door = new Color32(212, 8, 8, 255);
         public static Color32 resistant_bar = new Color32(126, 41, 187, 255);
         public static Color32 feed_bar = new Color32(219, 42, 82, 255);
 
@@ -856,6 +879,12 @@ public class ODMVariable
         public static Color32 white = new Color32(255, 255, 255, 255);
         public static Color32 gray_transparent = new Color32(45, 45, 45, 150);
         public static Color32 black = new Color32(0, 0, 0, 255);
+
+        //Item red amount
+        public static Color32 red_amount = new Color32(255, 54, 54, 255);
+        public static Color32 green_amount = new Color32(39, 184, 46, 255);
+
+
     }
 
     public enum itemCatalogue
@@ -871,11 +900,16 @@ public class ODMVariable
         pheromone_of_warmbugs = 6,
         refined_pheromone_of_warmbugs = 7,
         beacon_of_the_shadows = 8,
+        rct_pistol_enhanced = 9,
+        enhanced_component_a = 10,
+        enhanced_component_b = 11,
+        enhanced_component = 12,
 
         red_core_technology_energy = 20,
         beacon_of_the_esf = 21,
         general_battery = 22,
         creature_serum = 23,
+        empire_bullet = 24,
 
         refined_lactation = 30,
         nourished_larvae = 31,
@@ -903,7 +937,10 @@ public class ODMVariable
 
         electric_authentication_A = 68,
         electric_authentication_B = 69,
-        electric_authentication_C = 70
+        electric_authentication_C = 70,
+
+        super_item = 99
+
 
     }
 }

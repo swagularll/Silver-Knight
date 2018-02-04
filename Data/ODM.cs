@@ -37,9 +37,9 @@ public class ODM
     }
 
     #region SCENE
-    public static float getRandomPositionX(float basePositionX)
+    public static float getRandomPositionX(float _base_x,float _range)
     {
-        float drop_x = basePositionX + UnityEngine.Random.Range(-4f, 4f);
+        float drop_x = _base_x + UnityEngine.Random.Range(_range * -1, _range);
         if (drop_x < 0)
             drop_x += 1;
         if (drop_x > ODMVariable.level.activate_range_x)

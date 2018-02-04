@@ -7,13 +7,11 @@ using System;
 
 public class afterLoad : MonoBehaviour
 {
-    public List<GameObject> event_entity_collection;
-    public List<GameObject> item_entity_collection;
-    public List<GameObject> scene_object_collection;
+    public bool development_load = false;
 
-    //For scene drag
-    public GameObject obj_warmbug_lair;
-
+    private List<GameObject> event_entity_collection;
+    private List<GameObject> item_entity_collection;
+    private List<GameObject> scene_object_collection;
 
     private warmbugLair level_warmbug_lair;
     private eventCenter event_center;
@@ -23,29 +21,15 @@ public class afterLoad : MonoBehaviour
     private string map_display_text;
     private string stage_flag_name;
 
-    private string fsm_fade = "Fade";
-
-    private void InitialzeScript()
-    {
-        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
-        item_manager = ODMObject.event_manager.GetComponent<itemManager>();
-        level_warmbug_lair = obj_warmbug_lair.GetComponent<warmbugLair>();
-        scene_info_manager = ODMObject.event_manager.GetComponent<sceneObjectManager>();
-
-        CMap currentMap = ODMObject.event_manager.GetComponent<MapDatabase>().getMap(Application.loadedLevelName);
-        map_display_text = currentMap.name + " " + currentMap.title;
-        stage_flag_name = ODMVariable.convert.getAreaFlag(Application.loadedLevelName);
-    }
-
     void Start()
     {
         InitialzeScript();
 
         event_center.renewLocation(map_display_text);
 
-        if (!event_center.getFlagBool(stage_flag_name))//When player first time entering the level.
+        if (!event_center.getFlagBool(stage_flag_name) || development_load)//When player first time entering the level.
         {
-            //Set area flag true
+            //When first enter a level, set area flag true
             event_center.setFlagTrue(stage_flag_name);
 
             //Register local level warmbugs & items
@@ -60,15 +44,48 @@ public class afterLoad : MonoBehaviour
         }
 
         //check if there is any event running
-        if (!checkEventOccupation()) //Release Warmbugs
+        if (!checkEventOccupation())
         {
             level_warmbug_lair.releaseWarmbugs();
         }
+        ODMVariable.fsm.fade.SendEvent(eventName.fade_in);
 
-        fsmHelper.getFsm(ODMObject.event_manager, fsm_fade).SendEvent(eventName.fade_in);
         //fsmHelper.getFsm(transform.gameObject, "FSM").SendEvent("broadcast ready");//do some modification on this shit
     }
+    private void InitialzeScript()
+    {
+        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
+        item_manager = ODMObject.event_manager.GetComponent<itemManager>();
+        level_warmbug_lair = ODMObject.current_level_lair.GetComponent<warmbugLair>();
+        scene_info_manager = ODMObject.event_manager.GetComponent<sceneObjectManager>();
 
+        CMap currentMap = ODMObject.event_manager.GetComponent<MapDatabase>().getMap(Application.loadedLevelName);
+        map_display_text = currentMap.name + " " + currentMap.title;
+        stage_flag_name = ODMVariable.convert.getAreaFlag(Application.loadedLevelName);
+
+        event_entity_collection = new List<GameObject>();
+        item_entity_collection = new List<GameObject>();
+        scene_object_collection = new List<GameObject>();
+
+        //Collect array
+        BroadcastMessage(eventName.sys.register_event, transform.gameObject, SendMessageOptions.DontRequireReceiver);
+        BroadcastMessage(eventName.sys.register_item, transform.gameObject, SendMessageOptions.DontRequireReceiver);
+        BroadcastMessage(eventName.sys.register_scene_object, transform.gameObject, SendMessageOptions.DontRequireReceiver);
+    }
+
+    public void addToItemCollection(GameObject _item_entity)
+    {
+        item_entity_collection.Add(_item_entity);
+    }
+    public void addToEventCollection(GameObject _event_entity)
+    {
+        event_entity_collection.Add(_event_entity);
+    }
+    public void addToSceneObjectCollection(GameObject _scene_object)
+    {
+         scene_object_collection.Add(_scene_object);
+    }
+    
     private bool checkEventOccupation()
     {
         for (int i = 0; i < event_entity_collection.Count; i++)

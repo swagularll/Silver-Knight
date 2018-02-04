@@ -61,7 +61,7 @@ public class dialogPanel : MonoBehaviour
 
     public void showMessage(string _flagName)
     {
-        GetComponent<actionControl>().setIdle();
+        ODMObject.character_ava.GetComponent<actionControl>().setIdle();
         ODMVariable.fsm.scene_controller.SendEvent(eventName.start_hold);
         ODMVariable.is_on_event = true;
         ODMObject.player_condition_panel.GetComponent<Animator>().SetBool(ODMVariable.animation.is_open, false);

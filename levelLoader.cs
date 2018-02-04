@@ -35,7 +35,7 @@ public class levelLoader : MonoBehaviour
         else
         {
             setPlayerPosition();//Set player position by map
-            event_center.GetComponent<actionControl>().setIdle();
+            ODMObject.character_ava.GetComponent<actionControl>().setIdle();
         }
     }
 

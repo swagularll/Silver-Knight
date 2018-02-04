@@ -70,6 +70,41 @@ public class actionControl : MonoBehaviour
         fsm.FsmVariables.GetFsmString(ODMVariable.common.previous_state).Value = fsm.ActiveStateName;
         fsm.SendEvent(eventName.hold_fsm);
     }
+
+    public void reloadCheck()
+    {
+
+        inventoryDash inventory_dash = ODMObject.event_manager.GetComponent<inventoryDash>();
+        if (
+            //Full bullets - no need to reload
+            inventory_dash.getPistolBulletAmount() == ODMVariable.bullet_max ||
+            //No bullets remaining
+            (inventory_dash.getItemAmount((int)ODMVariable.itemCatalogue.red_core_technology_energy) == 0 &&
+            inventory_dash.getItemAmount((int)ODMVariable.itemCatalogue.empire_bullet) == 0) ||
+            //No RCT bullets stock but with RCT bullets in pistol
+            ((ODMVariable.ava_current_weapon == 1 || ODMVariable.ava_current_weapon == 3) &&
+            inventory_dash.getItemAmount((int)ODMVariable.itemCatalogue.red_core_technology_energy) == 0 &&
+            inventory_dash.getItemAmount((int)ODMVariable.itemCatalogue.rct_pistol) != 0) ||
+            //No Empire bullets stock but with Empire bullets in pistol
+            (ODMVariable.ava_current_weapon == 2 && inventory_dash.getItemAmount((int)ODMVariable.itemCatalogue.empire_bullet) == 0 &&
+            inventory_dash.getItemAmount((int)ODMVariable.itemCatalogue.rct_pistol) != 0)
+            )
+
+        {
+            setIdle();
+        }
+        else
+        {
+            ODMObject.event_manager.GetComponent<inventoryDash>().reload();
+            getActiveFsm().SendEvent(eventName.start_reload);
+        }
+    }
+
+    public void updateSlot()
+    {
+        BroadcastMessage(eventName.sys.check_weapon, SendMessageOptions.DontRequireReceiver);
+    }
+
     public void avaGetKilled()
     {
         //second fix

@@ -4,6 +4,7 @@ using System;
 using HutongGames.PlayMaker;
 
 using LitJson;
+using System.Collections.Generic;
 
 public class itemSetting : MonoBehaviour
 {
@@ -25,19 +26,11 @@ public class itemSetting : MonoBehaviour
     private CDocument c_document;
     private ItemDatabase item_db;
     private inventoryDash inventory_dash;
-
-
     private void Awake()
     {
-        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
-        dialogue_panel = ODMObject.event_manager.GetComponent<dialogPanel>();
-        item_db = ODMObject.event_manager.GetComponent<ItemDatabase>();
-        inventory_dash = ODMObject.event_manager.GetComponent<inventoryDash>();
-
         if (!is_document)
         {
             item_info = new sceneItemInfo();
-
             item_info.item_guid = Guid.NewGuid().ToString();
             item_info.catalog_code = catalog_code;
             item_info.located_level = Application.loadedLevelName;
@@ -45,27 +38,64 @@ public class itemSetting : MonoBehaviour
             item_info.location_y = this.transform.position.y;
             item_info.location_z = this.transform.position.z;
         }
-        else
-        {
-            if(event_center.getFlagBool(flag_name))
-                GameObject.Destroy(transform.gameObject);
-        }
     }
 
     private void Start()
     {
+        initializeComponent();
+
         if (is_document)
         {
+            if (event_center.getFlagBool(flag_name))
+                GameObject.Destroy(transform.gameObject);
             initilaization();
         }
     }
+    public void initializeComponent()
+    {
+        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
+        dialogue_panel = ODMObject.event_manager.GetComponent<dialogPanel>();
+        item_db = ODMObject.event_manager.GetComponent<ItemDatabase>();
+        inventory_dash = ODMObject.event_manager.GetComponent<inventoryDash>();
+    }
 
-    private void collectItem()//Add item, set event callback reference
+    public void initilaization()
+    {
+        if (!String.IsNullOrEmpty(special_collect_msg))
+            default_collect_msg = special_collect_msg.Trim();
+
+        PlayMakerFSM fsm = fsmHelper.getFsm(transform.gameObject, linked_fsm.Trim());
+        fsm.FsmVariables.GetFsmString(ODMVariable.local.msg_flag_name).Value = default_collect_msg.Trim();
+        fsm.FsmVariables.GetFsmString(ODMVariable.local.fsm_name).Value = linked_fsm.Trim();
+        fsm.FsmVariables.GetFsmGameObject(ODMVariable.local.self).Value = transform.gameObject;
+
+        if (!String.IsNullOrEmpty(flag_name))
+            fsm.FsmVariables.GetFsmString(ODMVariable.local.flag_name).Value = flag_name.Trim();
+
+        fsm.SendEvent(eventName.script_ready);
+    }
+
+    public void resetPositionInfo(Vector3 vector3)
+    {
+        item_info.location_x = vector3.x;
+        item_info.location_y = vector3.y;
+        item_info.location_z = vector3.z;
+    }
+
+    #region For Call
+    public void registerItem(GameObject _level_loader)
+    {
+        _level_loader.GetComponent<afterLoad>().addToItemCollection(transform.gameObject);
+    }
+    #endregion
+
+    #region Fsm Call
+    private void collectItem()
     {
         if (is_document)
         {
             c_document = ODMObject.event_manager.GetComponent<documentDash>().getDocument(flag_name.Trim());
-            dialogue_panel.currentSlotItem = c_document.Name.Trim();//For replacing [INPUT] => ???
+            dialogue_panel.currentSlotItem = c_document.Name.Trim();//For displaying collection message
         }
         else
         {
@@ -100,32 +130,9 @@ public class itemSetting : MonoBehaviour
             ODMObject.event_manager.GetComponent<eventCenter>().setFlagTrue(flag_name);
         }
     }
+    #endregion
 
-    //Will only be called when object generates
-    public void initilaization()
-    {
-        if (!String.IsNullOrEmpty(special_collect_msg))
-            default_collect_msg = special_collect_msg.Trim();
-
-        PlayMakerFSM fsm = fsmHelper.getFsm(transform.gameObject, linked_fsm.Trim());
-        fsm.FsmVariables.GetFsmString(ODMVariable.local.msg_flag_name).Value = default_collect_msg.Trim();
-        fsm.FsmVariables.GetFsmString(ODMVariable.local.fsm_name).Value = linked_fsm.Trim();
-        fsm.FsmVariables.GetFsmGameObject(ODMVariable.local.self).Value = transform.gameObject;
-
-        if (!String.IsNullOrEmpty(flag_name))
-            fsm.FsmVariables.GetFsmString(ODMVariable.local.flag_name).Value = flag_name.Trim();
-
-        fsm.SendEvent(eventName.script_ready);
-    }
-
-    public void resetPositionInfo(Vector3 vector3)
-    {
-        item_info.location_x = vector3.x;
-        item_info.location_y = vector3.y;
-        item_info.location_z = vector3.z;
-    }
-
-    //Scene entity
+    #region Local Class
     public class sceneItemInfo
     {
         public string item_guid { get; set; }//For item with same id
@@ -150,5 +157,6 @@ public class itemSetting : MonoBehaviour
             this.location_z = item_info.location_z;
         }
     }
+    #endregion
 
 }

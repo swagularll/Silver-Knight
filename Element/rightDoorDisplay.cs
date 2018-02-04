@@ -9,22 +9,22 @@ public class rightDoorDisplay : MonoBehaviour
 
     public CMap mainMap;
     public CMap rightMap;
-    private eventCenter eventCenter;
+    private eventCenter event_center;
 
     void Start()
     {
-        eventCenter = ODMObject.event_manager.GetComponent<eventCenter>();
+        event_center = ODMObject.event_manager.GetComponent<eventCenter>();
     }
 
     public void checkVisibility()
     {
         if (mainMap.rightDoor != null)
         {
-            if (eventCenter.getFlagBool(ODMVariable.convert.getAreaFlag(mainMap.name)))
+            if (event_center.getFlagBool(ODMVariable.convert.getAreaFlag(mainMap.name)))
                 GetComponent<CanvasGroup>().alpha = 1f;
             else if (rightMap != null)
             {
-                if (eventCenter.getFlagBool(ODMVariable.convert.getAreaFlag(rightMap.name)))
+                if (event_center.getFlagBool(ODMVariable.convert.getAreaFlag(rightMap.name)))
                     GetComponent<CanvasGroup>().alpha = 1f;
                 else
                     GetComponent<CanvasGroup>().alpha = 0f;
@@ -46,7 +46,7 @@ public class rightDoorDisplay : MonoBehaviour
         if (mainMap.rightDoor != null)
         {
             string doorFlag = ODMVariable.convert.getRightDoorFlag(mainMap.name);
-            if (eventCenter.getFlagBool(doorFlag))
+            if (event_center.getFlagBool(doorFlag))
                 GetComponent<Image>().color = ODMVariable.color.green_accessable_door;
             else
                 GetComponent<Image>().color = ODMVariable.color.red_blocked_door;

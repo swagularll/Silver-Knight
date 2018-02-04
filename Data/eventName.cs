@@ -17,6 +17,8 @@ public class eventName
 
     //Player control
     public static string ava_jump_Idle = "jump_Idle";
+    public static string start_reload = "start reload";//Different from system.reload
+
 
     //Event status
     public static string ava_get_hit = "ava get hit";
@@ -87,6 +89,8 @@ public class eventName
     //BGM
     public static string set_default_bgm = "set default bgm";
 
+    //Common get attacked event
+    public static string get_hit = "get hit";
 
 
     //BS
@@ -96,14 +100,24 @@ public class eventName
     //public static string has_internet = "has internet";
     //public static string mac_success = "mac success";
     //public static string mac_failed = "mac failed";
-    public static class system
+    public static class sys
     {
         public static string hide_gui = "hideGUI";
         public static string show_gui = "showGUI";
 
         public static string self_register = "selfRegister";
 
-        
+        //Scene register
+        public static string register_item = "registerItem";
+        public static string register_scene_object = "registerSceneObject";
+        public static string register_event = "registerEvent";
+
+        //When Warmbug get hit
+        public static string apply_damage = "applyDamage";
+
+        //For actionControl to checking weapon slot display
+        public static string check_weapon = "checkWeapon";
+
     }
 
 }

@@ -36,35 +36,29 @@ public class diarySystem : MonoBehaviour
     #region OUTCALL FUNCTIONS
     public void addResist()
     {
-        string materName = ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name;
-        diary_log.resist.Add(materName);
+        diary_log.resist.Add(ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name);
     }
 
     public void addFeed()
     {
-        string materName = ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name;
-        diary_log.feed.Add(materName);
+        diary_log.feed.Add(ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name);
     }
 
     public void addResistFailed()
     {
-        string materName = ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name;
-        diary_log.resist_failed.Add(materName);
+        diary_log.resist_failed.Add(ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name);
     }
     public void addResistSuccess()
     {
-        string materName = ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name;
-        diary_log.resist_success.Add(materName);
+        diary_log.resist_success.Add(ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name);
     }
     public void addFeedFailed()
     {
-        string materName = ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name;
-        diary_log.feed_failed.Add(materName);
+        diary_log.feed_failed.Add(ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name);
     }
     public void addFeedSuccess()
     {
-        string materName = ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name;
-        diary_log.feed_success.Add(materName);
+        diary_log.feed_success.Add(ODMObject.current_mate.GetComponent<warmbugAction>().warmbug_name);
     }
 
     public void addDeadCount()

@@ -183,4 +183,17 @@ public static class ODMObject
             FsmVariables.GlobalVariables.GetFsmGameObject("currentEventObject").Value = value;
         }
     }
+
+    public static GameObject current_level_lair
+    {
+        get
+        {
+            return FsmVariables.GlobalVariables.GetFsmGameObject("currentLevelLair").Value;
+        }
+
+        set
+        {
+            FsmVariables.GlobalVariables.GetFsmGameObject("currentLevelLair").Value = value;
+        }
+    }
 }

@@ -25,7 +25,7 @@ public class warmbugAction : MonoBehaviour
     private PlayMakerFSM health_fsm;
     private PlayMakerFSM damage_fsm;
     private PlayMakerFSM warmbug_ai_fsm;
-    private string health_fsm_name = "Health System";
+    private string health_fsm_name = ODMVariable.common.health_fsm;
     private string damage_fsm_name = "Warmbug Damage";
     private string warmbug_ai_fsm_name = "Warmbug AI";
 
@@ -40,11 +40,19 @@ public class warmbugAction : MonoBehaviour
         }
     }
 
-    public void initilization(warmbugLair _lair, lairInfo _lair_info, bool isLiving)
+    public void initilization(warmbugLair _lair, lairInfo _lair_info)
     {
         ref_lair = _lair;
         lair_info = _lair_info;
         warmbug_guid = _lair_info.warmbug_guid;
+        getAbilitiesHealth();
+        getAbilitiesDamage();
+    }
+    public void initilization(warmbugLair _lair)
+    {
+        ref_lair = _lair;
+        lair_info = new lairInfo();
+        warmbug_guid = lair_info.warmbug_guid;
         getAbilitiesHealth();
         getAbilitiesDamage();
     }
@@ -84,6 +92,9 @@ public class warmbugAction : MonoBehaviour
                 case 4:
                     difficuly_magnification = (float)lair_info.hellMagnification;
                     break;
+                default:
+                    ODM.errorLog(transform.name, "Missing game difficulty: getAbilitiesHealth()");
+                    break;
             }
             warmbug_hp = health_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.warmbug_hp).Value = (float)(warmbug_hp * difficuly_magnification);
             sp_bonus = health_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.sp_bonus).Value = (float)(sp_bonus * difficuly_magnification);
@@ -117,6 +128,9 @@ public class warmbugAction : MonoBehaviour
                     break;
                 case 4:
                     difficulyMagnification = 2.7f;
+                    break;
+                default:
+                    ODM.errorLog(transform.name, "Missing game difficulty: getAbilitiesDamage()");
                     break;
             }
             armor_creak = damage_fsm.FsmVariables.GetFsmFloat(ODMVariable.warmbug.armor_creak).Value = (float)(armor_creak * difficulyMagnification);

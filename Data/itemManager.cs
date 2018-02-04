@@ -9,10 +9,7 @@ using UnityEngine;
 
 public class itemManager : MonoBehaviour
 {
-    //Scene drag item 
-
-    public List<GameObject> item_entity_collection;
-
+    public List<GameObject> base_item_entity_collection;
     private List<itemSetting.sceneItemInfo> item_distribution;
     private Dictionary<string, GameObject> item_entity_dictionary;
 
@@ -29,9 +26,9 @@ public class itemManager : MonoBehaviour
     }
     public void loadItemEntityDictionary()
     {
-        for (int i = 0; i < item_entity_collection.Count; i++)
+        for (int i = 0; i < base_item_entity_collection.Count; i++)
         {
-            item_entity_dictionary.Add(((int)item_entity_collection[i].GetComponent<itemSetting>().catalog_code).ToString(), item_entity_collection[i]);
+            item_entity_dictionary.Add(((int)base_item_entity_collection[i].GetComponent<itemSetting>().catalog_code).ToString(), base_item_entity_collection[i]);
         }
     }
     #endregion
@@ -43,6 +40,10 @@ public class itemManager : MonoBehaviour
         if (item_entity_dictionary.TryGetValue(_catalog_code, out item_entity)) // Returns true.
             return item_entity_dictionary[_catalog_code];
         return null;
+    }
+    public List<itemSetting.sceneItemInfo> getItemDistribution()
+    {
+        return item_distribution;
     }
     #endregion
 
@@ -57,7 +58,6 @@ public class itemManager : MonoBehaviour
     {
         item_distribution.RemoveAll(x => x.item_guid.Equals(_guid));
     }
-    #endregion
 
     public void deployLevelItems(string _level_name)
     {
@@ -84,9 +84,6 @@ public class itemManager : MonoBehaviour
         scene_item.GetComponent<itemSetting>().item_amount = _amout;
         registerItem(scene_item);
     }
+    #endregion
 
-    public List<itemSetting.sceneItemInfo> getItemDistribution()
-    {
-        return item_distribution;
-    }
 }

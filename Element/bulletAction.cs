@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class bulletAction : MonoBehaviour {
 
-    //Shout add bullet hit event*
     public GameObject se_gun_sound;
 
     public float bullet_speed;
     public float angle;
     public float bullet_virtical_speed;
-    public float power;
+    public int bullet_type;
     private PlayMakerFSM fsm;
 
     private void Awake()
@@ -25,5 +24,10 @@ public class bulletAction : MonoBehaviour {
         fsm.FsmVariables.GetFsmFloat(ODMVariable.local.bullet_virtical_speed).Value = bullet_virtical_speed;
         fsm.enabled = true;
         Instantiate(se_gun_sound);
+    }
+
+    public void sendDamage(GameObject _target)
+    {
+        _target.SendMessage(eventName.sys.apply_damage, bullet_type, SendMessageOptions.DontRequireReceiver);
     }
 }

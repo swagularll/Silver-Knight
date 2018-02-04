@@ -16,4 +16,11 @@ public class sceneObjectInfo : MonoBehaviour {
         return identifier;
     }
 
+    #region For Call
+    public void registerSceneObject(GameObject _level_loader)
+    {
+        _level_loader.GetComponent<afterLoad>().addToSceneObjectCollection(transform.gameObject);
+    }
+    #endregion
+
 }

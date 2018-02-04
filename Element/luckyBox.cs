@@ -8,6 +8,8 @@ public class luckyBox : MonoBehaviour
     public List<GameObject> reward_collection;
     public List<int> amount_collection;
 
+    public GameObject ref_location;
+
     private string identifier;
     private PlayMakerFSM fsm;
 
@@ -69,7 +71,7 @@ public class luckyBox : MonoBehaviour
         for (int i = 0; i < reward_collection.Count; i++)
         {
             item_manager.createItem(((int)reward_collection[i].GetComponent<itemSetting>().catalog_code).ToString(),
-                amount_collection[i], ODM.getRandomPositionX(transform.position.x));
+                amount_collection[i], ODM.getRandomPositionX(ref_location.transform.position.x, 0.5f));
         }
     }
 }

@@ -13,12 +13,9 @@ public class warmbugLair : MonoBehaviour
 {
     public bool isActivate;//For testing
     private bool isApproved;
-    private bool resetRequest;
+    private bool setLevelRequest;
 
-    public List<GameObject> lair_entity_collection;
-    public List<GameObject> living_bug_entity_colleciton = new List<GameObject>();
-
-
+    public List<GameObject> warmbug_lair_collection;
     private List<lairInfo> level_lair_info_collection;// for save record
 
     private eventCenter event_center;
@@ -34,68 +31,37 @@ public class warmbugLair : MonoBehaviour
         level_name = Application.loadedLevelName;
         reset_flag = ODMVariable.convert.getWarmbugResetFlag(level_name);
         lair_approval_flag = ODMVariable.convert.getWarmbugFlag(level_name);
+        ODMObject.current_level_lair = transform.gameObject;
     }
     private void Start()
     {
-        InitialzeScript();
+        initializeComponent();
 
         isApproved = event_center.getFlagBool(lair_approval_flag);
-        resetRequest = event_center.getFlagBool(reset_flag);
+        setLevelRequest = event_center.getFlagBool(reset_flag);
     }
 
-    private void InitialzeScript()
+    private void initializeComponent()
     {
         warmbug_lair_manager = ODMObject.event_manager.GetComponent<warmbugLairManager>();
         event_center = ODMObject.event_manager.GetComponent<eventCenter>();
-    }
 
-    private void generateLairInfo()
-    {
-        //For empty lairs
-        for (int i = 0; i < lair_entity_collection.Count; i++)
+        //Register non-growing lairs
+        for (int i = 0; i < transform.childCount; ++i)
         {
-            //Get Warmbug from catalogue
-            int bug_rand_index = (int)UnityEngine.Random.Range(0, 100.0f) % warmbug_lair_manager.getBugCatelogCount();
-            GameObject lair_born_bug = warmbug_lair_manager.getCatelogBugEntity(bug_rand_index);
-            createBugFromLairInfo(lair_born_bug, lair_entity_collection[i]);
-        }
-
-        //For living bugs
-        for (int i = 0; i < living_bug_entity_colleciton.Count; i++)
-        {
-            createBugFromLivingBug(living_bug_entity_colleciton[i]);
+            GameObject lair = transform.GetChild(i).gameObject;
+            if (!lair.GetComponent<lairSetting>().isGrowingLair)
+                warmbug_lair_collection.Add(lair);
         }
     }
-
-    public void createBugFromLairInfo(GameObject _lair_born_bug, GameObject _lair_location)
-    {
-        lairInfo lair_info = new lairInfo();
-        _lair_born_bug.GetComponent<warmbugAction>().initilization(this, lair_info, false);
-        lair_info.bug_name = _lair_born_bug.GetComponent<warmbugAction>().getName();
-        lair_info.location_x = _lair_location.transform.position.x;
-        //collection x value
-        //bug.transform.position = bug_position;//record WB location for reput
-        level_lair_info_collection.Add(lair_info);
-    }
-
-    public void createBugFromLivingBug(GameObject _living_bug)
-    {
-        lairInfo lair_info = new lairInfo();
-        _living_bug.GetComponent<warmbugAction>().initilization(this, lair_info, false);
-        lair_info.bug_name = _living_bug.GetComponent<warmbugAction>().getName();
-        lair_info.location_x = _living_bug.transform.position.x;
-        //collection x value
-        //bug.transform.position = bug_position;//record WB location for reput
-        level_lair_info_collection.Add(lair_info);
-    }
-
     public void releaseWarmbugs()
     {
         if (isActivate || isApproved)
         {
-            if (resetRequest)
+            if (setLevelRequest)
             {
                 generateLairInfo();
+                //To avoid double deploy, do this after deploy bugs
                 deployBugs();
                 event_center.setFlagFalse(reset_flag);
             }
@@ -103,8 +69,61 @@ public class warmbugLair : MonoBehaviour
             {
                 deployBugs();
             }
+            releaseGrowingLairWarmbug();
         }
     }
+
+    /// <summary>
+    /// This method will make an instance and add info data to collection
+    /// </summary>
+    private void releaseGrowingLairWarmbug()
+    {
+        for (int i = 0; i < transform.childCount; ++i)
+        {
+            GameObject lair = transform.GetChild(i).gameObject;
+            if (lair.GetComponent<lairSetting>().isGrowingLair)
+            {
+                lair.GetComponent<lairSetting>().initilizeGrowingLair();
+            }
+        }
+    }
+    private void generateLairInfo()
+    {
+        for (int i = 0; i < warmbug_lair_collection.Count; i++)
+        {
+            //Get Warmbug from catalogue
+            int bug_rand_index = (int)UnityEngine.Random.Range(0, 100.0f) % warmbug_lair_manager.getBugCatelogCount();
+            GameObject lair_born_bug = warmbug_lair_manager.getCatelogBugEntity(bug_rand_index);
+            createBugFromLairInfo(lair_born_bug, warmbug_lair_collection[i]);
+        }
+    }
+    
+    public void createBugFromLairInfo(GameObject _lair_born_bug, GameObject _lair_location)
+    {
+        lairInfo lair_info = new lairInfo();
+        _lair_born_bug.GetComponent<warmbugAction>().initilization(this, lair_info);
+        lair_info.bug_name = _lair_born_bug.GetComponent<warmbugAction>().getName();
+        lair_info.location_x = _lair_location.transform.position.x;
+        level_lair_info_collection.Add(lair_info);
+    }
+
+    public void addBugLairInfo(lairInfo _lair_info)
+    {
+        level_lair_info_collection.Add(_lair_info);
+        updateBugDistribution();
+    }
+
+    //public void createBugFromLivingBug(GameObject _living_bug)
+    //{
+    //    lairInfo lair_info = new lairInfo();
+    //    _living_bug.GetComponent<warmbugAction>().initilization(this, lair_info);
+    //    lair_info.bug_name = _living_bug.GetComponent<warmbugAction>().getName();
+    //    lair_info.location_x = _living_bug.transform.position.x;
+    //    //collection x value
+    //    //bug.transform.position = bug_position;//record WB location for reput
+    //    level_lair_info_collection.Add(lair_info);
+    //    updateBugDistribution();
+    //}
 
     #region WARMBUG SCENE CONTROL
 
@@ -115,7 +134,7 @@ public class warmbugLair : MonoBehaviour
             putBug(level_lair_info_collection[i]);
         }
     }
-    private void putBug(lairInfo _lair_info)
+    public void putBug(lairInfo _lair_info)
     {
         GameObject catelog_bug = warmbug_lair_manager.getCatelogBugEntity(_lair_info.bug_name);
         Vector3 bug_position = new Vector3((float)_lair_info.location_x,
@@ -124,7 +143,7 @@ public class warmbugLair : MonoBehaviour
 
         //Deploy Warmbug
         GameObject bug = (GameObject)Instantiate(catelog_bug, bug_position, Quaternion.identity);
-        bug.GetComponent<warmbugAction>().initilization(this, _lair_info, false);
+        bug.GetComponent<warmbugAction>().initilization(this, _lair_info);
     }
     public void setDead(string _warmbugID)
     {
@@ -133,12 +152,10 @@ public class warmbugLair : MonoBehaviour
     }
     #endregion
 
-
     #region DISTRIBUTION MANIPULATION
     public void registerLevelLair()
     {
         generateLairInfo();
-        warmbug_lair_manager.registerLair(level_name, JsonMapper.ToJson(living_bug_entity_colleciton).ToString());
     }
     public void loadLevelLair()
     {

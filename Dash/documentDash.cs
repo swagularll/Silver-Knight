@@ -13,6 +13,8 @@ public class documentDash : MonoBehaviour
     public TextAsset txtSource;
     public GameObject model_btnDocument;
     public GameObject model_txtDocumentName;
+    public GameObject left_arror;
+    public GameObject right_arror;
 
 
     public GameObject document_text_page_count;
@@ -308,8 +310,8 @@ public class documentDash : MonoBehaviour
     {
         isReadingDocument = false;
         document_text_page.GetComponent<CanvasGroup>().alpha = 0;
-        GameObject.Find("Document Left Arrow").GetComponent<CanvasGroup>().alpha = 0;
-        GameObject.Find("Document Right Arrow").GetComponent<CanvasGroup>().alpha = 0;
+        left_arror.GetComponent<CanvasGroup>().alpha = 0;
+        right_arror.GetComponent<CanvasGroup>().alpha = 0;
         document_title_in_sheet.GetComponent<CanvasGroup>().alpha = 1;
         document_hint_read.GetComponent<CanvasGroup>().alpha = 1;
         document_context_area_text.GetComponent<CanvasGroup>().alpha = 0;
@@ -349,8 +351,8 @@ public class documentDash : MonoBehaviour
         {
             document_hint_selection.GetComponent<CanvasGroup>().alpha = 0;
 
-            GameObject.Find("Document Left Arrow").GetComponent<CanvasGroup>().alpha = 0;
-            GameObject.Find("Document Right Arrow").GetComponent<CanvasGroup>().alpha = 0;
+            left_arror.GetComponent<CanvasGroup>().alpha = 0;
+            right_arror.GetComponent<CanvasGroup>().alpha = 0;
             document_text_page.GetComponent<CanvasGroup>().alpha = 0;
             document_title_in_sheet.GetComponent<CanvasGroup>().alpha = 0;
             document_hint_read.GetComponent<CanvasGroup>().alpha = 0;
@@ -411,13 +413,13 @@ public class documentDash : MonoBehaviour
         setDocuemntPageText();
         if (maxDocumentPage > 1)
         {
-            GameObject.Find("Document Left Arrow").GetComponent<CanvasGroup>().alpha = 0;
-            GameObject.Find("Document Right Arrow").GetComponent<CanvasGroup>().alpha = 1;
+            left_arror.GetComponent<CanvasGroup>().alpha = 0;
+            right_arror.GetComponent<CanvasGroup>().alpha = 1;
         }
         else
         {
-            GameObject.Find("Document Left Arrow").GetComponent<CanvasGroup>().alpha = 0;
-            GameObject.Find("Document Right Arrow").GetComponent<CanvasGroup>().alpha = 0;
+            left_arror.GetComponent<CanvasGroup>().alpha = 0;
+            right_arror.GetComponent<CanvasGroup>().alpha = 0;
         }
     }
     private void switchDocumentPage()
@@ -427,18 +429,18 @@ public class documentDash : MonoBehaviour
 
         if (currentDocumentPage == d.Content.Count)//final page
         {
-            GameObject.Find("Document Left Arrow").GetComponent<CanvasGroup>().alpha = 1;
-            GameObject.Find("Document Right Arrow").GetComponent<CanvasGroup>().alpha = 0;
+            left_arror.GetComponent<CanvasGroup>().alpha = 1;
+            right_arror.GetComponent<CanvasGroup>().alpha = 0;
         }
         else if (currentDocumentPage == 1)
         {
-            GameObject.Find("Document Left Arrow").GetComponent<CanvasGroup>().alpha = 0;
-            GameObject.Find("Document Right Arrow").GetComponent<CanvasGroup>().alpha = 1;
+            left_arror.GetComponent<CanvasGroup>().alpha = 0;
+            right_arror.GetComponent<CanvasGroup>().alpha = 1;
         }
         else
         {
-            GameObject.Find("Document Left Arrow").GetComponent<CanvasGroup>().alpha = 1;
-            GameObject.Find("Document Right Arrow").GetComponent<CanvasGroup>().alpha = 1;
+            left_arror.GetComponent<CanvasGroup>().alpha = 1;
+            right_arror.GetComponent<CanvasGroup>().alpha = 1;
         }
         setDocuemntPageText();
     }
